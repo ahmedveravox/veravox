@@ -1,22 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0A0F1E;
-  --bg-secondary: #0D1829;
-  --gold: #C9A84C;
-  --gold-light: #F5D78E;
-  --gold-dim: rgba(201, 168, 76, 0.15);
+  --bg-primary: #0B1512;
+  --bg-secondary: #0F1D18;
+  --green: #3BAF7A;
+  --green-light: #6DCFA0;
+  --green-dim: rgba(59,175,122,0.15);
   --cyan: #00D4FF;
   --purple: #8B5CF6;
   --text-primary: #ffffff;
   --text-muted: rgba(255, 255, 255, 0.4);
-  --border-gold: rgba(201, 168, 76, 0.15);
+  --border-green: rgba(59,175,122,0.15);
   --border-subtle: rgba(255, 255, 255, 0.06);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   background: var(--bg-primary);
@@ -29,47 +27,14 @@ body {
   font-family: var(--font-amiri), "Traditional Arabic", "Arial Unicode MS", serif;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(201, 168, 76, 0.3);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(201, 168, 76, 0.5);
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: rgba(59,175,122,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(59,175,122,0.5); }
+::selection { background: rgba(59,175,122,0.25); color: #fff; }
 
-/* Arabic text selection */
-::selection {
-  background: rgba(201, 168, 76, 0.25);
-  color: #fff;
-}
-
-/* Smooth transitions for interactive elements */
-button {
-  transition: all 0.2s ease;
-}
-
-/* Geometric background pattern */
 .geo-pattern {
   background-image:
-    repeating-linear-gradient(
-      45deg,
-      rgba(201, 168, 76, 0.015) 0px,
-      rgba(201, 168, 76, 0.015) 1px,
-      transparent 1px,
-      transparent 20px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(201, 168, 76, 0.015) 0px,
-      rgba(201, 168, 76, 0.015) 1px,
-      transparent 1px,
-      transparent 20px
-    );
+    repeating-linear-gradient(45deg, rgba(59,175,122,0.02) 0px, rgba(59,175,122,0.02) 1px, transparent 1px, transparent 22px),
+    repeating-linear-gradient(-45deg, rgba(59,175,122,0.02) 0px, rgba(59,175,122,0.02) 1px, transparent 1px, transparent 22px);
 }

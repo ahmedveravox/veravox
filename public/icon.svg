@@ -1,50 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background -->
-  <rect width="512" height="512" rx="100" fill="#0A0F1E"/>
+  <rect width="512" height="512" rx="110" fill="#1A3D2B"/>
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)"/>
 
-  <!-- Outer golden ring -->
-  <circle cx="256" cy="256" r="210" fill="none" stroke="#C9A84C" stroke-width="4" opacity="0.5"/>
+  <!-- Subtle geometric border -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
 
-  <!-- Inner decorative ring -->
-  <circle cx="256" cy="256" r="185" fill="none" stroke="#C9A84C" stroke-width="1.5" opacity="0.25"/>
-
-  <!-- Geometric star pattern (8-pointed) -->
-  <g transform="translate(256,256)" opacity="0.18">
-    <polygon points="0,-150 35,-35 150,0 35,35 0,150 -35,35 -150,0 -35,-35" fill="#C9A84C"/>
-    <polygon points="0,-150 35,-35 150,0 35,35 0,150 -35,35 -150,0 -35,-35" fill="none" stroke="#C9A84C" stroke-width="1" transform="rotate(45)"/>
+  <!-- Open book icon -->
+  <g transform="translate(256,210)">
+    <!-- Left page -->
+    <path d="M-10,-70 C-40,-65 -90,-50 -110,-30 L-110,80 C-90,65 -40,55 -10,58 Z"
+          fill="rgba(255,255,255,0.9)" opacity="0.95"/>
+    <!-- Right page -->
+    <path d="M10,-70 C40,-65 90,-50 110,-30 L110,80 C90,65 40,55 10,58 Z"
+          fill="rgba(255,255,255,0.75)" opacity="0.9"/>
+    <!-- Spine -->
+    <rect x="-6" y="-72" width="12" height="135" rx="4" fill="white"/>
+    <!-- Lines on left page -->
+    <line x1="-90" y1="-10" x2="-20" y2="-18" stroke="rgba(0,0,0,0.2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-90" y1="10" x2="-20" y2="4" stroke="rgba(0,0,0,0.15)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-90" y1="28" x2="-20" y2="24" stroke="rgba(0,0,0,0.15)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-85" y1="46" x2="-20" y2="44" stroke="rgba(0,0,0,0.1)" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Lines on right page -->
+    <line x1="90" y1="-10" x2="20" y2="-18" stroke="rgba(0,0,0,0.2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="90" y1="10" x2="20" y2="4" stroke="rgba(0,0,0,0.15)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="28" x2="20" y2="24" stroke="rgba(0,0,0,0.15)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="85" y1="46" x2="20" y2="44" stroke="rgba(0,0,0,0.1)" stroke-width="2.5" stroke-linecap="round"/>
   </g>
 
-  <!-- Center glow circle -->
-  <circle cx="256" cy="256" r="140" fill="url(#centerGlow)"/>
-
-  <!-- App name: نور الروح -->
-  <text
-    x="256"
-    y="270"
-    text-anchor="middle"
-    font-family="'Traditional Arabic', 'Arial Unicode MS', serif"
-    font-size="110"
-    font-weight="bold"
-    fill="url(#goldGrad)"
-  >نور الروح</text>
-
-  <!-- Corner diamonds -->
-  <g fill="#C9A84C" opacity="0.4">
-    <polygon points="256,58 263,72 256,86 249,72" />
-    <polygon points="256,426 263,440 256,454 249,440" />
-    <polygon points="58,256 72,263 86,256 72,249" />
-    <polygon points="426,256 440,263 454,256 440,249" />
-  </g>
+  <!-- App name below book -->
+  <text x="256" y="390" text-anchor="middle"
+        font-family="'Traditional Arabic','Arial Unicode MS',serif"
+        font-size="72" font-weight="bold" fill="white" opacity="0.95">
+    نور
+  </text>
 
   <defs>
-    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#0A0F1E" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F5D78E"/>
-      <stop offset="50%" stop-color="#C9A84C"/>
-      <stop offset="100%" stop-color="#9A6F1E"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1F5C3A"/>
+      <stop offset="100%" stop-color="#0B2A1A"/>
     </linearGradient>
   </defs>
 </svg>
