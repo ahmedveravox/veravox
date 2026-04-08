@@ -70,7 +70,7 @@ export default function SurahPage({
         setTranslations(engData.data?.ayahs ?? []);
         setLoading(false);
         // Update browser tab title
-        document.title = `${arabicData.data.name} | نور`;
+        document.title = `${arabicData.data.name} | نور الروح`;
       })
       .catch(() => setLoading(false));
 

@@ -11,23 +11,23 @@ const amiri = Amiri({
 
 export const metadata: Metadata = {
   title: {
-    default: "نور – القرآن الكريم",
-    template: "%s | نور",
+    default: "نور الروح – القرآن الكريم",
+    template: "%s | نور الروح",
   },
-  description: "تطبيق نور للقرآن الكريم – اقرأ واستمع وتدبّر",
+  description: "تطبيق نور الروح للقرآن الكريم – اقرأ واستمع وتدبّر",
   manifest: "/manifest.json",
   themeColor: "#0A0F1E",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "نور",
+    title: "نور الروح",
   },
   icons: {
     icon: "/icon.svg",
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "نور – القرآن الكريم",
+    title: "نور الروح – القرآن الكريم",
     description: "اقرأ القرآن الكريم واستمع للتلاوة مع الترجمة",
     type: "website",
   },
@@ -44,7 +44,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="نور" />
+        <meta name="apple-mobile-web-app-title" content="نور الروح" />
         <meta name="theme-color" content="#0A0F1E" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
       </head>

@@ -17,16 +17,16 @@
   <!-- Center glow circle -->
   <circle cx="256" cy="256" r="140" fill="url(#centerGlow)"/>
 
-  <!-- Arabic letter ن (Nun) for نور -->
+  <!-- App name: نور الروح -->
   <text
     x="256"
-    y="310"
+    y="270"
     text-anchor="middle"
     font-family="'Traditional Arabic', 'Arial Unicode MS', serif"
-    font-size="180"
+    font-size="110"
     font-weight="bold"
     fill="url(#goldGrad)"
-  >نور</text>
+  >نور الروح</text>
 
   <!-- Corner diamonds -->
   <g fill="#C9A84C" opacity="0.4">

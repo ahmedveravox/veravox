@@ -129,20 +129,20 @@ export default function Home() {
         <h1
           className="font-arabic"
           style={{
-            fontSize: "72px",
+            fontSize: "58px",
             fontWeight: "bold",
             background: "linear-gradient(135deg, #F5D78E 0%, #C9A84C 50%, #9A6F1E 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
             margin: "0",
-            lineHeight: "1",
-            letterSpacing: "6px",
+            lineHeight: "1.1",
+            letterSpacing: "4px",
             textShadow: "none",
             filter: "drop-shadow(0 0 30px rgba(201,168,76,0.3))",
           }}
         >
-          نور
+          نور الروح
         </h1>
 
         <p
@@ -164,7 +164,7 @@ export default function Home() {
             marginBottom: "28px",
           }}
         >
-          NOOR · THE HOLY QURAN
+          NOOR AL-ROUH · THE HOLY QURAN
         </p>
 
         {/* Stats */}
@@ -539,7 +539,7 @@ export default function Home() {
             ❝ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ ❞
           </span>
           <div style={{ marginTop: "8px", fontSize: "11px", letterSpacing: "3px", color: "rgba(255,255,255,0.15)" }}>
-            نور · NOOR
+            نور الروح · NOOR AL-ROUH
           </div>
         </div>
       </div>
