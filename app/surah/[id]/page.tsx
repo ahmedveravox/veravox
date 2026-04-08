@@ -64,19 +64,36 @@ export default function SurahPage({
     }
 
     setLoading(true);
-    Promise.all([
-      fetch(`https://api.alquran.cloud/v1/surah/${id}`).then((r) => r.json()),
-      fetch(`https://api.alquran.cloud/v1/surah/${id}/en.sahih`).then((r) =>
-        r.json()
-      ),
-    ])
-      .then(([arabicData, engData]) => {
-        setSurah(arabicData.data);
-        setTranslations(engData.data?.ayahs ?? []);
-        setLoading(false);
-        document.title = `${arabicData.data.name} | نور الروح`;
+
+    // حاول من الملف المحلي أولاً (يعمل بدون إنترنت)
+    fetch(`/data/surah-${id}.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error("no local data");
+        return r.json();
       })
-      .catch(() => setLoading(false));
+      .then((data) => {
+        setSurah(data);
+        setTranslations(data.ayahs.map((a: { numberInSurah: number; translation: string }) => ({
+          numberInSurah: a.numberInSurah,
+          text: a.translation,
+        })));
+        setLoading(false);
+        document.title = `${data.name} | نور الروح`;
+      })
+      .catch(() => {
+        // fallback: من الإنترنت
+        Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${id}`).then((r) => r.json()),
+          fetch(`https://api.alquran.cloud/v1/surah/${id}/en.sahih`).then((r) => r.json()),
+        ])
+          .then(([arabicData, engData]) => {
+            setSurah(arabicData.data);
+            setTranslations(engData.data?.ayahs ?? []);
+            setLoading(false);
+            document.title = `${arabicData.data.name} | نور الروح`;
+          })
+          .catch(() => setLoading(false));
+      });
 
     // تحميل التفسير من الملف المحلي
     fetch("/data/tafsir-saadi.json")

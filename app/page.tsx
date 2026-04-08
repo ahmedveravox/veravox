@@ -29,16 +29,29 @@ export default function Home() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("https://api.alquran.cloud/v1/surah")
-      .then((r) => r.json())
-      .then((data) => {
-        setSurahs(data.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-
     const saved = localStorage.getItem("quran-bookmarks");
     if (saved) setBookmarks(JSON.parse(saved));
+
+    // حاول من الملف المحلي أولاً (بدون إنترنت)
+    fetch("/data/surahs.json")
+      .then((r) => {
+        if (!r.ok) throw new Error("no local data");
+        return r.json();
+      })
+      .then((data) => {
+        setSurahs(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // fallback: من الإنترنت
+        fetch("https://api.alquran.cloud/v1/surah")
+          .then((r) => r.json())
+          .then((data) => {
+            setSurahs(data.data);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      });
   }, []);
 
   const toggleBookmark = (e: React.MouseEvent, num: number) => {
