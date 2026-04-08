@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#0A0F1E"/>
+
+  <!-- Outer golden ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#C9A84C" stroke-width="4" opacity="0.5"/>
+
+  <!-- Inner decorative ring -->
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#C9A84C" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- Geometric star pattern (8-pointed) -->
+  <g transform="translate(256,256)" opacity="0.18">
+    <polygon points="0,-150 35,-35 150,0 35,35 0,150 -35,35 -150,0 -35,-35" fill="#C9A84C"/>
+    <polygon points="0,-150 35,-35 150,0 35,35 0,150 -35,35 -150,0 -35,-35" fill="none" stroke="#C9A84C" stroke-width="1" transform="rotate(45)"/>
+  </g>
+
+  <!-- Center glow circle -->
+  <circle cx="256" cy="256" r="140" fill="url(#centerGlow)"/>
+
+  <!-- Arabic letter ن (Nun) for نور -->
+  <text
+    x="256"
+    y="310"
+    text-anchor="middle"
+    font-family="'Traditional Arabic', 'Arial Unicode MS', serif"
+    font-size="180"
+    font-weight="bold"
+    fill="url(#goldGrad)"
+  >نور</text>
+
+  <!-- Corner diamonds -->
+  <g fill="#C9A84C" opacity="0.4">
+    <polygon points="256,58 263,72 256,86 249,72" />
+    <polygon points="256,426 263,440 256,454 249,440" />
+    <polygon points="58,256 72,263 86,256 72,249" />
+    <polygon points="426,256 440,263 454,256 440,249" />
+  </g>
+
+  <defs>
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0A0F1E" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D78E"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#9A6F1E"/>
+    </linearGradient>
+  </defs>
+</svg>

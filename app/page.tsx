@@ -119,35 +119,52 @@ export default function Home() {
             fontSize: "14px",
             letterSpacing: "2px",
             color: "rgba(201,168,76,0.6)",
-            marginBottom: "6px",
+            marginBottom: "10px",
           }}
         >
           بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
         </p>
+
+        {/* App name: نور */}
         <h1
           className="font-arabic"
           style={{
-            fontSize: "52px",
+            fontSize: "72px",
             fontWeight: "bold",
-            background: "linear-gradient(135deg, #C9A84C, #F5D78E, #C9A84C)",
+            background: "linear-gradient(135deg, #F5D78E 0%, #C9A84C 50%, #9A6F1E 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
-            margin: "0 0 4px",
-            lineHeight: "1.2",
+            margin: "0",
+            lineHeight: "1",
+            letterSpacing: "6px",
+            textShadow: "none",
+            filter: "drop-shadow(0 0 30px rgba(201,168,76,0.3))",
+          }}
+        >
+          نور
+        </h1>
+
+        <p
+          className="font-arabic"
+          style={{
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "18px",
+            marginBottom: "4px",
+            letterSpacing: "1px",
           }}
         >
           القرآن الكريم
-        </h1>
+        </p>
         <p
           style={{
             color: "var(--text-muted)",
-            fontSize: "13px",
-            letterSpacing: "4px",
+            fontSize: "11px",
+            letterSpacing: "5px",
             marginBottom: "28px",
           }}
         >
-          THE HOLY QURAN
+          NOOR · THE HOLY QURAN
         </p>
 
         {/* Stats */}
@@ -517,9 +534,14 @@ export default function Home() {
           fontSize: "12px",
         }}
       >
-        <span className="font-arabic" style={{ fontSize: "16px", color: "rgba(201,168,76,0.4)" }}>
-          ❝ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ ❞
-        </span>
+        <div>
+          <span className="font-arabic" style={{ fontSize: "16px", color: "rgba(201,168,76,0.4)" }}>
+            ❝ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ ❞
+          </span>
+          <div style={{ marginTop: "8px", fontSize: "11px", letterSpacing: "3px", color: "rgba(255,255,255,0.15)" }}>
+            نور · NOOR
+          </div>
+        </div>
       </div>
     </main>
   );

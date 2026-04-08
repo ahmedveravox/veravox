@@ -10,8 +10,27 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  title: "القرآن الكريم",
-  description: "تطبيق للقرآن الكريم مع التلاوة والترجمة الإنجليزية",
+  title: {
+    default: "نور – القرآن الكريم",
+    template: "%s | نور",
+  },
+  description: "تطبيق نور للقرآن الكريم – اقرأ واستمع وتدبّر",
+  manifest: "/manifest.json",
+  themeColor: "#0A0F1E",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "نور",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "نور – القرآن الكريم",
+    description: "اقرأ القرآن الكريم واستمع للتلاوة مع الترجمة",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -21,6 +40,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={`${amiri.variable} h-full`}>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="نور" />
+        <meta name="theme-color" content="#0A0F1E" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

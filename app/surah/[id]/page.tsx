@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
+import Head from "next/head";
 
 interface Ayah {
   number: number;
@@ -68,6 +69,8 @@ export default function SurahPage({
         setSurah(arabicData.data);
         setTranslations(engData.data?.ayahs ?? []);
         setLoading(false);
+        // Update browser tab title
+        document.title = `${arabicData.data.name} | نور`;
       })
       .catch(() => setLoading(false));
 
