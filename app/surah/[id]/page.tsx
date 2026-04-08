@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
-import Head from "next/head";
 
 interface Ayah {
   number: number;
@@ -28,6 +27,9 @@ interface TranslationAyah {
   text: string;
 }
 
+// تفسير السعدي: { [surahNum]: { [ayahNum]: "نص التفسير" } }
+type TafsirData = Record<string, Record<string, string>>;
+
 const ARABIC_NUMBERS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 function toArabicNum(n: number): string {
   return String(n)
@@ -44,8 +46,11 @@ export default function SurahPage({
   const { id } = use(params);
   const [surah, setSurah] = useState<SurahData | null>(null);
   const [translations, setTranslations] = useState<TranslationAyah[]>([]);
+  const [tafsir, setTafsir] = useState<TafsirData | null>(null);
+  const [tafsirAvailable, setTafsirAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showTranslation, setShowTranslation] = useState(false);
+  const [showTafsir, setShowTafsir] = useState(false);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [audioLoading, setAudioLoading] = useState<number | null>(null);
@@ -69,10 +74,23 @@ export default function SurahPage({
         setSurah(arabicData.data);
         setTranslations(engData.data?.ayahs ?? []);
         setLoading(false);
-        // Update browser tab title
         document.title = `${arabicData.data.name} | نور الروح`;
       })
       .catch(() => setLoading(false));
+
+    // تحميل التفسير من الملف المحلي
+    fetch("/data/tafsir-saadi.json")
+      .then((r) => {
+        if (!r.ok) throw new Error("not found");
+        return r.json();
+      })
+      .then((data: TafsirData) => {
+        setTafsir(data);
+        setTafsirAvailable(true);
+      })
+      .catch(() => {
+        setTafsirAvailable(false);
+      });
 
     return () => {
       if (audioRef.current) {
@@ -302,7 +320,43 @@ export default function SurahPage({
         </div>
 
         {/* Controls */}
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          {/* زر تفسير السعدي */}
+          {tafsirAvailable ? (
+            <button
+              onClick={() => setShowTafsir(!showTafsir)}
+              style={{
+                background: showTafsir
+                  ? "rgba(201,168,76,0.15)"
+                  : "rgba(255,255,255,0.04)",
+                border: `1px solid ${showTafsir ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: "8px",
+                padding: "7px 12px",
+                color: showTafsir ? "var(--gold)" : "rgba(255,255,255,0.5)",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontFamily: "inherit",
+              }}
+              title="تفسير السعدي"
+            >
+              تفسير
+            </button>
+          ) : (
+            <span
+              style={{
+                fontSize: "11px",
+                color: "rgba(255,255,255,0.2)",
+                padding: "7px 10px",
+                border: "1px dashed rgba(255,255,255,0.1)",
+                borderRadius: "8px",
+                cursor: "default",
+              }}
+              title="شغّل: node scripts/download-tafsir.mjs"
+            >
+              تفسير ✗
+            </span>
+          )}
+
           <button
             onClick={() => setShowTranslation(!showTranslation)}
             style={{
@@ -434,6 +488,7 @@ export default function SurahPage({
           const isPlaying = playingAyah === ayah.numberInSurah;
           const isLoading = audioLoading === ayah.numberInSurah;
           const translation = translations[idx];
+          const tafsirText = tafsir?.[id]?.[String(ayah.numberInSurah)];
 
           return (
             <div
@@ -571,12 +626,53 @@ export default function SurahPage({
                   lineHeight: "2.3",
                   color: "rgba(255,255,255,0.95)",
                   textAlign: "right",
-                  marginBottom: showTranslation && translation ? "18px" : "0",
+                  marginBottom: (showTafsir && tafsirText) || (showTranslation && translation) ? "18px" : "0",
                   letterSpacing: "0.5px",
                 }}
               >
                 {ayah.text}
               </div>
+
+              {/* تفسير السعدي */}
+              {showTafsir && tafsirText && (
+                <div
+                  style={{
+                    borderTop: "1px solid rgba(201,168,76,0.12)",
+                    paddingTop: "16px",
+                    marginBottom: showTranslation && translation ? "16px" : "0",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(201,168,76,0.5)",
+                      letterSpacing: "2px",
+                      marginBottom: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span style={{ color: "var(--gold)", fontSize: "14px" }}>📖</span>
+                    تفسير السعدي
+                  </div>
+                  <div
+                    className="font-arabic"
+                    style={{
+                      fontSize: "17px",
+                      color: "rgba(255,255,255,0.7)",
+                      lineHeight: "2",
+                      textAlign: "right",
+                      background: "rgba(201,168,76,0.03)",
+                      border: "1px solid rgba(201,168,76,0.08)",
+                      borderRadius: "10px",
+                      padding: "14px 16px",
+                    }}
+                  >
+                    {tafsirText}
+                  </div>
+                </div>
+              )}
 
               {/* English translation */}
               {showTranslation && translation && (
