@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 
 interface Ayah {
@@ -51,10 +51,7 @@ export default function SurahPage({
   const [loading, setLoading] = useState(true);
   const [showTranslation, setShowTranslation] = useState(false);
   const [showTafsir, setShowTafsir] = useState(false);
-  const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
-  const [audioLoading, setAudioLoading] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("quran-bookmarks");
@@ -109,51 +106,7 @@ export default function SurahPage({
         setTafsirAvailable(false);
       });
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
   }, [id]);
-
-  const playAudio = (ayahNum: number) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    if (playingAyah === ayahNum) {
-      setPlayingAyah(null);
-      return;
-    }
-
-    const surahPad = String(id).padStart(3, "0");
-    const ayahPad = String(ayahNum).padStart(3, "0");
-    const url = `https://everyayah.com/data/Alafasy_128kbps/${surahPad}${ayahPad}.mp3`;
-
-    setAudioLoading(ayahNum);
-    const audio = new Audio(url);
-    audioRef.current = audio;
-
-    audio.addEventListener("canplay", () => {
-      setAudioLoading(null);
-      setPlayingAyah(ayahNum);
-      audio.play();
-    });
-
-    audio.addEventListener("ended", () => {
-      setPlayingAyah(null);
-      setAudioLoading(null);
-    });
-
-    audio.addEventListener("error", () => {
-      setAudioLoading(null);
-      setPlayingAyah(null);
-    });
-
-    audio.load();
-  };
 
   const toggleBookmark = () => {
     const saved = localStorage.getItem("quran-bookmarks");
@@ -502,8 +455,6 @@ export default function SurahPage({
         style={{ maxWidth: "800px", margin: "0 auto", padding: "16px 16px" }}
       >
         {surah.ayahs.map((ayah, idx) => {
-          const isPlaying = playingAyah === ayah.numberInSurah;
-          const isLoading = audioLoading === ayah.numberInSurah;
           const translation = translations[idx];
           const tafsirText = tafsir?.[id]?.[String(ayah.numberInSurah)];
 
@@ -511,14 +462,11 @@ export default function SurahPage({
             <div
               key={ayah.number}
               style={{
-                background: isPlaying
-                  ? "rgba(201,168,76,0.04)"
-                  : "rgba(255,255,255,0.02)",
-                border: `1px solid ${isPlaying ? "rgba(201,168,76,0.3)" : "rgba(201,168,76,0.07)"}`,
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(201,168,76,0.07)",
                 borderRadius: "14px",
                 padding: "24px 24px 20px",
                 marginBottom: "10px",
-                transition: "all 0.2s ease",
               }}
             >
               {/* Ayah header row */}
@@ -535,8 +483,7 @@ export default function SurahPage({
                   style={{
                     minWidth: "40px",
                     height: "40px",
-                    background:
-                      "linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.04))",
+                    background: "linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.04))",
                     border: "1px solid rgba(201,168,76,0.4)",
                     borderRadius: "50%",
                     display: "flex",
@@ -561,78 +508,13 @@ export default function SurahPage({
                   }}
                 >
                   {ayah.juz > 0 && <span>جزء {toArabicNum(ayah.juz)}</span>}
-                  {ayah.page > 0 && (
-                    <span>صفحة {toArabicNum(ayah.page)}</span>
-                  )}
+                  {ayah.page > 0 && <span>صفحة {toArabicNum(ayah.page)}</span>}
                   {ayah.sajda && (
-                    <span
-                      style={{
-                        color: "rgba(201,168,76,0.5)",
-                        fontSize: "12px",
-                      }}
-                    >
+                    <span style={{ color: "rgba(201,168,76,0.5)", fontSize: "12px" }}>
                       ۩ سجدة
                     </span>
                   )}
                 </div>
-
-                {/* Play button */}
-                <button
-                  onClick={() => playAudio(ayah.numberInSurah)}
-                  style={{
-                    background: isPlaying
-                      ? "rgba(201,168,76,0.18)"
-                      : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${isPlaying ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)"}`,
-                    borderRadius: "10px",
-                    padding: "8px 16px",
-                    color: isPlaying ? "var(--gold)" : "rgba(255,255,255,0.45)",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontFamily: "inherit",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isPlaying) {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor =
-                        "rgba(201,168,76,0.35)";
-                      (e.currentTarget as HTMLButtonElement).style.color =
-                        "rgba(255,255,255,0.7)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isPlaying) {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor =
-                        "rgba(255,255,255,0.1)";
-                      (e.currentTarget as HTMLButtonElement).style.color =
-                        "rgba(255,255,255,0.45)";
-                    }
-                  }}
-                >
-                  {isLoading ? (
-                    <>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: "10px",
-                          height: "10px",
-                          border: "2px solid rgba(201,168,76,0.3)",
-                          borderTopColor: "var(--gold)",
-                          borderRadius: "50%",
-                          animation: "spin 0.8s linear infinite",
-                        }}
-                      />
-                      تحميل
-                    </>
-                  ) : isPlaying ? (
-                    <>⏸ إيقاف</>
-                  ) : (
-                    <>▶ استمع</>
-                  )}
-                </button>
               </div>
 
               {/* Arabic text */}
@@ -789,11 +671,6 @@ export default function SurahPage({
         )}
       </div>
 
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </main>
   );
 }
