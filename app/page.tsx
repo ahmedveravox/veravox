@@ -11,12 +11,36 @@ interface Surah {
   revelationType: string;
 }
 
+interface LastRead {
+  surahNum: number;
+  surahName: string;
+  ayahNum: number;
+}
+
 const ARABIC_NUMBERS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 function toArabicNum(n: number): string {
-  return String(n)
-    .split("")
-    .map((d) => ARABIC_NUMBERS[parseInt(d)] ?? d)
-    .join("");
+  return String(n).split("").map((d) => ARABIC_NUMBERS[parseInt(d)] ?? d).join("");
+}
+
+function SkeletonCard() {
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(201,168,76,0.07)",
+      borderRadius: "14px",
+      padding: "18px 20px",
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+    }}>
+      <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.05)", flexShrink: 0 }} />
+      <div style={{ flex: 1 }}>
+        <div style={{ height: 18, width: "60%", background: "rgba(255,255,255,0.05)", borderRadius: 6, marginBottom: 8 }} />
+        <div style={{ height: 12, width: "40%", background: "rgba(255,255,255,0.03)", borderRadius: 6 }} />
+      </div>
+      <div style={{ width: 44, height: 24, background: "rgba(255,255,255,0.03)", borderRadius: 20 }} />
+    </div>
+  );
 }
 
 export default function Home() {
@@ -26,30 +50,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"all" | "bookmarks">("all");
   const [filter, setFilter] = useState<"all" | "meccan" | "medinan">("all");
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [lastRead, setLastRead] = useState<LastRead | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("quran-bookmarks");
-    if (saved) setBookmarks(JSON.parse(saved));
+    const savedBm = localStorage.getItem("quran-bookmarks");
+    if (savedBm) setBookmarks(JSON.parse(savedBm));
 
-    // حاول من الملف المحلي أولاً (بدون إنترنت)
+    const savedLast = localStorage.getItem("quran-last-read");
+    if (savedLast) setLastRead(JSON.parse(savedLast));
+
     fetch("/data/surahs.json")
-      .then((r) => {
-        if (!r.ok) throw new Error("no local data");
-        return r.json();
-      })
-      .then((data) => {
-        setSurahs(data);
-        setLoading(false);
-      })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data) => { setSurahs(data); setLoading(false); })
       .catch(() => {
-        // fallback: من الإنترنت
         fetch("https://api.alquran.cloud/v1/surah")
           .then((r) => r.json())
-          .then((data) => {
-            setSurahs(data.data);
-            setLoading(false);
-          })
+          .then((data) => { setSurahs(data.data); setLoading(false); })
           .catch(() => setLoading(false));
       });
   }, []);
@@ -77,459 +93,184 @@ export default function Home() {
   });
 
   return (
-    <main
-      className="geo-pattern"
-      style={{
-        background: "var(--bg-primary)",
-        minHeight: "100vh",
-        direction: "rtl",
-      }}
-    >
+    <main className="geo-pattern" style={{ background: "var(--bg-primary)", minHeight: "100vh", direction: "rtl" }}>
       {/* Ambient glows */}
-      <div
-        style={{
-          position: "fixed",
-          width: "600px",
-          height: "600px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(201,168,76,0.04), transparent 70%)",
-          top: "-100px",
-          right: "-100px",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          width: "500px",
-          height: "500px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(0,212,255,0.03), transparent 70%)",
-          bottom: "-100px",
-          left: "-100px",
-          pointerEvents: "none",
-        }}
-      />
+      <div style={{ position: "fixed", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.05), transparent 70%)", top: -100, right: -100, pointerEvents: "none" }} />
+      <div style={{ position: "fixed", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(0,212,255,0.03), transparent 70%)", bottom: -100, left: -100, pointerEvents: "none" }} />
 
-      {/* Header */}
-      <header
-        style={{
-          background: "rgba(13,24,41,0.95)",
-          backdropFilter: "blur(20px)",
-          borderBottom: "1px solid var(--border-gold)",
-          padding: "40px 24px 0",
-          textAlign: "center",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <p
-          className="font-arabic"
-          style={{
-            fontSize: "14px",
-            letterSpacing: "2px",
-            color: "rgba(201,168,76,0.6)",
-            marginBottom: "10px",
-          }}
-        >
+      {/* ═══ HEADER ═══ */}
+      <header style={{ background: "rgba(13,24,41,0.97)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-gold)", padding: "32px 20px 0", textAlign: "center", position: "sticky", top: 0, zIndex: 100 }}>
+        <p className="font-arabic" style={{ fontSize: 13, color: "rgba(201,168,76,0.55)", marginBottom: 8, letterSpacing: 1 }}>
           بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
         </p>
-
-        {/* App name: نور */}
-        <h1
-          className="font-arabic"
-          style={{
-            fontSize: "58px",
-            fontWeight: "bold",
-            background: "linear-gradient(135deg, #F5D78E 0%, #C9A84C 50%, #9A6F1E 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            margin: "0",
-            lineHeight: "1.1",
-            letterSpacing: "4px",
-            textShadow: "none",
-            filter: "drop-shadow(0 0 30px rgba(201,168,76,0.3))",
-          }}
-        >
-          نور الروح
-        </h1>
-
-        <p
-          className="font-arabic"
-          style={{
-            color: "rgba(255,255,255,0.5)",
-            fontSize: "18px",
-            marginBottom: "4px",
-            letterSpacing: "1px",
-          }}
-        >
-          القرآن الكريم
-        </p>
-        <p
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "11px",
-            letterSpacing: "5px",
-            marginBottom: "28px",
-          }}
-        >
-          NOOR AL-ROUH · THE HOLY QURAN
-        </p>
+        <h1 className="font-arabic" style={{
+          fontSize: "clamp(40px, 8vw, 62px)",
+          fontWeight: "bold",
+          background: "linear-gradient(135deg, #F5D78E 0%, #C9A84C 50%, #9A6F1E 100%)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+          margin: 0, lineHeight: 1.1, letterSpacing: 4,
+          filter: "drop-shadow(0 0 28px rgba(201,168,76,0.25))",
+        }}>نور الروح</h1>
+        <p className="font-arabic" style={{ color: "rgba(255,255,255,0.45)", fontSize: 16, marginBottom: 2 }}>القرآن الكريم</p>
+        <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: 5, marginBottom: 20 }}>NOOR AL-ROUH · THE HOLY QURAN</p>
 
         {/* Stats */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "32px",
-            marginBottom: "24px",
-          }}
-        >
-          {[
-            ["١١٤", "سورة"],
-            ["٦٢٣٦", "آية"],
-            ["٣٠", "جزء"],
-          ].map(([num, label]) => (
+        <div style={{ display: "flex", justifyContent: "center", gap: 28, marginBottom: 20 }}>
+          {[["١١٤", "سورة"], ["٦٢٣٦", "آية"], ["٣٠", "جزءً"]].map(([num, label]) => (
             <div key={label} style={{ textAlign: "center" }}>
-              <div
-                className="font-arabic"
-                style={{
-                  fontSize: "22px",
-                  fontWeight: "bold",
-                  color: "var(--gold)",
-                }}
-              >
-                {num}
-              </div>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                {label}
-              </div>
+              <div className="font-arabic" style={{ fontSize: 20, fontWeight: "bold", color: "var(--gold)" }}>{num}</div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{label}</div>
             </div>
           ))}
         </div>
 
         {/* Search */}
-        <div
-          style={{
-            maxWidth: "540px",
-            margin: "0 auto 20px",
-            position: "relative",
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              right: "16px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "var(--text-muted)",
-              fontSize: "16px",
-              pointerEvents: "none",
-            }}
-          >
-            🔍
-          </span>
+        <div style={{ maxWidth: 540, margin: "0 auto 16px", position: "relative" }}>
+          <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }}>🔍</span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ابحث باسم السورة أو رقمها..."
-            style={{
-              width: "100%",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(201,168,76,0.25)",
-              borderRadius: "14px",
-              padding: "14px 48px 14px 20px",
-              color: "white",
-              fontSize: "16px",
-              outline: "none",
-              boxSizing: "border-box",
-              textAlign: "right",
-              fontFamily: "inherit",
-            }}
-            onFocus={(e) =>
-              (e.target.style.borderColor = "rgba(201,168,76,0.6)")
-            }
-            onBlur={(e) =>
-              (e.target.style.borderColor = "rgba(201,168,76,0.25)")
-            }
+            style={{ width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "12px 44px 12px 16px", color: "white", fontSize: 15, outline: "none", boxSizing: "border-box", textAlign: "right", fontFamily: "inherit" }}
+            onFocus={(e) => (e.target.style.borderColor = "rgba(201,168,76,0.55)")}
+            onBlur={(e) => (e.target.style.borderColor = "rgba(201,168,76,0.2)")}
           />
         </div>
 
-        {/* Tabs + Filter row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            maxWidth: "540px",
-            margin: "0 auto",
-            paddingBottom: "0",
-          }}
-        >
-          {/* Tabs */}
-          <div style={{ display: "flex", gap: "0" }}>
-            {(
-              [
-                ["all", "كل السور"],
-                ["bookmarks", "المفضلة"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                style={{
-                  padding: "10px 20px",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: `2px solid ${activeTab === key ? "var(--gold)" : "transparent"}`,
-                  color:
-                    activeTab === key ? "var(--gold)" : "var(--text-muted)",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                }}
-              >
+        {/* Tabs + Filter */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: 540, margin: "0 auto" }}>
+          <div style={{ display: "flex" }}>
+            {([ ["all", "كل السور"], ["bookmarks", "المفضلة"] ] as const).map(([key, label]) => (
+              <button key={key} onClick={() => setActiveTab(key)} style={{
+                padding: "9px 18px", background: "transparent", border: "none",
+                borderBottom: `2px solid ${activeTab === key ? "var(--gold)" : "transparent"}`,
+                color: activeTab === key ? "var(--gold)" : "var(--text-muted)",
+                cursor: "pointer", fontSize: 13, fontFamily: "inherit",
+              }}>
                 {label}
                 {key === "bookmarks" && bookmarks.length > 0 && (
-                  <span
-                    style={{
-                      marginRight: "6px",
-                      background: "rgba(201,168,76,0.2)",
-                      borderRadius: "10px",
-                      padding: "1px 7px",
-                      fontSize: "11px",
-                      color: "var(--gold)",
-                    }}
-                  >
+                  <span style={{ marginRight: 5, background: "rgba(201,168,76,0.18)", borderRadius: 10, padding: "1px 6px", fontSize: 10, color: "var(--gold)" }}>
                     {bookmarks.length}
                   </span>
                 )}
               </button>
             ))}
           </div>
-
-          {/* Filter pills */}
-          <div style={{ display: "flex", gap: "6px" }}>
-            {(
-              [
-                ["all", "الكل"],
-                ["meccan", "مكية"],
-                ["medinan", "مدنية"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                style={{
-                  padding: "5px 12px",
-                  background:
-                    filter === key
-                      ? "rgba(201,168,76,0.15)"
-                      : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${filter === key ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)"}`,
-                  borderRadius: "20px",
-                  color: filter === key ? "var(--gold)" : "var(--text-muted)",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontFamily: "inherit",
-                }}
-              >
-                {label}
-              </button>
+          <div style={{ display: "flex", gap: 5 }}>
+            {([ ["all", "الكل"], ["meccan", "مكية"], ["medinan", "مدنية"] ] as const).map(([key, label]) => (
+              <button key={key} onClick={() => setFilter(key)} style={{
+                padding: "4px 10px",
+                background: filter === key ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${filter === key ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 20, color: filter === key ? "var(--gold)" : "var(--text-muted)",
+                cursor: "pointer", fontSize: 11, fontFamily: "inherit",
+              }}>{label}</button>
             ))}
           </div>
         </div>
       </header>
 
+      {/* ═══ CONTINUE READING ═══ */}
+      {lastRead && !search && activeTab === "all" && (
+        <div style={{ maxWidth: 960, margin: "16px auto 0", padding: "0 16px" }}>
+          <Link href={`/surah/${lastRead.surahNum}`} style={{ textDecoration: "none", display: "block" }}>
+            <div style={{
+              background: "linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.03))",
+              border: "1px solid rgba(201,168,76,0.3)",
+              borderRadius: 14, padding: "14px 20px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              cursor: "pointer",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ fontSize: 22, color: "var(--gold)" }}>📖</div>
+                <div>
+                  <div style={{ fontSize: 11, color: "rgba(201,168,76,0.6)", letterSpacing: 2, marginBottom: 3 }}>متابعة القراءة</div>
+                  <div className="font-arabic" style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
+                    {lastRead.surahName}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    الآية {toArabicNum(lastRead.ayahNum)}
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: 20, color: "rgba(201,168,76,0.5)" }}>‹</div>
+            </div>
+          </Link>
+        </div>
+      )}
+
       {/* Count */}
-      <div
-        style={{
-          maxWidth: "960px",
-          margin: "0 auto",
-          padding: "16px 16px 8px",
-          color: "var(--text-muted)",
-          fontSize: "13px",
-        }}
-      >
-        {!loading && (
-          <span>
-            {toArabicNum(filtered.length)} سورة
-            {search && ` · نتائج البحث عن "${search}"`}
-          </span>
-        )}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "12px 16px 6px", color: "var(--text-muted)", fontSize: 12 }}>
+        {!loading && <span>{toArabicNum(filtered.length)} سورة{search && ` · نتائج البحث عن "${search}"`}</span>}
       </div>
 
-      {/* Surah Grid */}
-      <div
-        style={{ maxWidth: "960px", margin: "0 auto", padding: "0 16px 48px" }}
-      >
+      {/* ═══ SURAH GRID ═══ */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 16px 48px" }}>
         {loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "80px",
-              color: "var(--text-muted)",
-            }}
-          >
-            <div
-              className="font-arabic"
-              style={{ fontSize: "24px", marginBottom: "12px" }}
-            >
-              ﷽
-            </div>
-            <div style={{ fontSize: "16px" }}>جاري تحميل السور...</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
+            {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "80px",
-              color: "var(--text-muted)",
-            }}
-          >
-            <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔍</div>
-            <div style={{ fontSize: "16px" }}>لا توجد نتائج</div>
+          <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--text-muted)" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
+            <div className="font-arabic" style={{ fontSize: 18 }}>لا توجد نتائج</div>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "12px",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
             {filtered.map((surah) => {
               const isMeccan = surah.revelationType === "Meccan";
               const isBookmarked = bookmarks.includes(surah.number);
-              const isHovered = hoveredCard === surah.number;
+              const isLastRead = lastRead?.surahNum === surah.number;
 
               return (
                 <div key={surah.number} style={{ position: "relative" }}>
-                  <Link
-                    href={`/surah/${surah.number}`}
-                    style={{ textDecoration: "none", display: "block" }}
-                  >
-                    <div
-                      onMouseEnter={() => setHoveredCard(surah.number)}
-                      onMouseLeave={() => setHoveredCard(null)}
-                      style={{
-                        background: isHovered
-                          ? "rgba(201,168,76,0.06)"
-                          : "rgba(255,255,255,0.025)",
-                        border: `1px solid ${isHovered ? "rgba(201,168,76,0.35)" : "var(--border-gold)"}`,
-                        borderRadius: "14px",
-                        padding: "18px 20px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        transition: "all 0.2s ease",
-                        transform: isHovered ? "translateY(-1px)" : "none",
-                        boxShadow: isHovered
-                          ? "0 4px 24px rgba(201,168,76,0.1)"
-                          : "none",
-                      }}
-                    >
-                      {/* Number badge */}
-                      <div
-                        style={{
-                          minWidth: "46px",
-                          height: "46px",
-                          background:
-                            "linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.05))",
-                          border: "1px solid rgba(201,168,76,0.35)",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "14px",
-                          color: "var(--gold)",
-                          fontWeight: "bold",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {surah.number}
-                      </div>
+                  <Link href={`/surah/${surah.number}`} style={{ textDecoration: "none", display: "block" }}>
+                    <div className="surah-card" style={{
+                      background: isLastRead ? "rgba(201,168,76,0.05)" : "rgba(255,255,255,0.025)",
+                      border: `1px solid ${isLastRead ? "rgba(201,168,76,0.3)" : "var(--border-gold)"}`,
+                      borderRadius: 14, padding: "16px 18px", cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: 14,
+                      transition: "all 0.18s ease",
+                    }}>
+                      {/* Number */}
+                      <div style={{
+                        minWidth: 44, height: 44,
+                        background: "linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.04))",
+                        border: "1px solid rgba(201,168,76,0.32)", borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 13, color: "var(--gold)", fontWeight: "bold", flexShrink: 0,
+                      }}>{surah.number}</div>
 
-                      {/* Surah info */}
+                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          className="font-arabic"
-                          style={{
-                            fontSize: "22px",
-                            fontWeight: "bold",
-                            color: "white",
-                            lineHeight: "1.3",
-                            marginBottom: "3px",
-                          }}
-                        >
+                        <div className="font-arabic" style={{ fontSize: 21, fontWeight: "bold", color: "white", lineHeight: 1.3, marginBottom: 2 }}>
                           {surah.name}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--text-muted)",
-                          }}
-                        >
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
                           {surah.englishName} · {surah.numberOfAyahs} آية
                         </div>
                       </div>
 
-                      {/* Type badge */}
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          padding: "4px 10px",
-                          borderRadius: "20px",
-                          background: isMeccan
-                            ? "rgba(0,212,255,0.08)"
-                            : "rgba(139,92,246,0.08)",
-                          color: isMeccan ? "var(--cyan)" : "var(--purple)",
-                          border: `1px solid ${isMeccan ? "rgba(0,212,255,0.25)" : "rgba(139,92,246,0.25)"}`,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {isMeccan ? "مكية" : "مدنية"}
-                      </div>
+                      {/* Badge */}
+                      <div style={{
+                        fontSize: 10, padding: "3px 9px", borderRadius: 20, flexShrink: 0,
+                        background: isMeccan ? "rgba(0,212,255,0.08)" : "rgba(139,92,246,0.08)",
+                        color: isMeccan ? "var(--cyan)" : "var(--purple)",
+                        border: `1px solid ${isMeccan ? "rgba(0,212,255,0.22)" : "rgba(139,92,246,0.22)"}`,
+                      }}>{isMeccan ? "مكية" : "مدنية"}</div>
                     </div>
                   </Link>
 
-                  {/* Bookmark button */}
+                  {/* Bookmark */}
                   <button
                     onClick={(e) => toggleBookmark(e, surah.number)}
-                    title={isBookmarked ? "إزالة من المفضلة" : "إضافة للمفضلة"}
                     style={{
-                      position: "absolute",
-                      bottom: "14px",
-                      left: "14px",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "17px",
-                      color: isBookmarked
-                        ? "var(--gold)"
-                        : "rgba(255,255,255,0.15)",
-                      padding: "4px",
-                      lineHeight: 1,
-                      zIndex: 10,
+                      position: "absolute", bottom: 12, left: 12,
+                      background: "transparent", border: "none", cursor: "pointer",
+                      fontSize: 16, color: isBookmarked ? "var(--gold)" : "rgba(255,255,255,0.12)",
+                      padding: 4, lineHeight: 1, zIndex: 10, transition: "color 0.15s",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isBookmarked)
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "rgba(201,168,76,0.5)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isBookmarked)
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "rgba(255,255,255,0.15)";
-                    }}
-                  >
-                    {isBookmarked ? "★" : "☆"}
-                  </button>
+                  >{isBookmarked ? "★" : "☆"}</button>
                 </div>
               );
             })}
@@ -538,24 +279,23 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          textAlign: "center",
-          padding: "24px",
-          borderTop: "1px solid var(--border-subtle)",
-          color: "var(--text-muted)",
-          fontSize: "12px",
-        }}
-      >
-        <div>
-          <span className="font-arabic" style={{ fontSize: "16px", color: "rgba(201,168,76,0.4)" }}>
-            ❝ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ ❞
-          </span>
-          <div style={{ marginTop: "8px", fontSize: "11px", letterSpacing: "3px", color: "rgba(255,255,255,0.15)" }}>
-            نور الروح · NOOR AL-ROUH
-          </div>
+      <div style={{ textAlign: "center", padding: "20px 16px", borderTop: "1px solid var(--border-subtle)" }}>
+        <div className="font-arabic" style={{ fontSize: 15, color: "rgba(201,168,76,0.35)" }}>
+          ❝ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ ❞
+        </div>
+        <div style={{ marginTop: 6, fontSize: 10, letterSpacing: 4, color: "rgba(255,255,255,0.1)" }}>
+          نور الروح · NOOR AL-ROUH
         </div>
       </div>
+
+      <style>{`
+        .surah-card:hover {
+          background: rgba(201,168,76,0.07) !important;
+          border-color: rgba(201,168,76,0.38) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 20px rgba(201,168,76,0.08);
+        }
+      `}</style>
     </main>
   );
 }
