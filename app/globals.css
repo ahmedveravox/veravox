@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
-:root {
+:root, [data-theme="dark"] {
   --bg-primary: #0B1512;
   --bg-secondary: #0F1D18;
+  --reader-bg: #0B1512;
+  --header-bg: #112B1E;
   --green: #3BAF7A;
   --green-light: #6DCFA0;
   --green-dim: rgba(59,175,122,0.15);
@@ -12,6 +14,20 @@
   --text-muted: rgba(255, 255, 255, 0.4);
   --border-green: rgba(59,175,122,0.15);
   --border-subtle: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="black"] {
+  --bg-primary: #000000;
+  --bg-secondary: #080808;
+  --reader-bg: #000000;
+  --header-bg: #0A0A0A;
+}
+
+[data-theme="dark-green"] {
+  --bg-primary: #061510;
+  --bg-secondary: #0A1F16;
+  --reader-bg: #061510;
+  --header-bg: #0C2419;
 }
 
 * { box-sizing: border-box; }

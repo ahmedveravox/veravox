@@ -171,17 +171,31 @@ export default function SurahPage({ params }: { params: Promise<{ id: string }> 
     return { pageNums:nums, pageMap:map, hasPages: nums.length>0 && nums[0]>0 };
   }, [surah]);
 
-  /* ── منطق البسملة (يمنع التكرار) ── */
+  /* ── منطق البسملة (يمنع التكرار نهائياً) ──
+     نحذف التشكيل كاملاً قبل الفحص لأن API يعيد أشكالاً مختلفة
+     مثل: بِسْمِ ٱللَّهِ  vs  بِسْمِ اللَّهِ
+  ── */
   const bismillahLogic = useMemo(() => {
-    if (!surah) return { isBismInData:false, needsBism:false, bismText:"" };
-    const first = surah.ayahs[0]?.text ?? "";
-    const isBismInData = first.includes("بِسْمِ اللَّهِ") || first.includes("بسم الله");
+    if (!surah) return { isBismInData:false, needsBism:false, afterBism:"" };
+    // حذف كل علامات التشكيل والحركات
+    const removeDiac = (s: string) =>
+      s.replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, "");
+    const clean = removeDiac(surah.ayahs[0]?.text ?? "").trim();
+    const isBismInData = clean.startsWith("بسم");
     const needsBism = surah.number !== 9;
-    return { isBismInData, needsBism, bismText: isBismInData ? first : "" };
+    // استخراج المحتوى بعد "رحيم" (مثل "الم" في البقرة)
+    let afterBism = "";
+    if (isBismInData && surah.number !== 1) {
+      const rahimIdx = clean.indexOf("رحيم");
+      if (rahimIdx !== -1) {
+        afterBism = clean.slice(rahimIdx + 4).trim();
+      }
+    }
+    return { isBismInData, needsBism, afterBism };
   }, [surah]);
 
   if (loading) return (
-    <div style={{ background:"#000", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:18 }}>
+    <div style={{ background:"var(--reader-bg,#000)", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:18 }}>
       <div className="font-arabic" style={{ fontSize:46, color:"rgba(59,175,122,0.3)" }}>﷽</div>
       <div style={{ width:36, height:36, border:"3px solid rgba(59,175,122,0.12)", borderTopColor:"#3BAF7A", borderRadius:"50%", animation:"spin .9s linear infinite" }}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -197,7 +211,7 @@ export default function SurahPage({ params }: { params: Promise<{ id: string }> 
   );
 
   const isMeccan = surah.revelationType === "Meccan";
-  const { isBismInData, needsBism, bismText } = bismillahLogic;
+  const { isBismInData, needsBism, afterBism } = bismillahLogic;
 
   /* الصفحة الحالية */
   const currentPageNum  = hasPages ? (pageNums[pageIdx] ?? 0) : 0;
@@ -229,7 +243,7 @@ export default function SurahPage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <main
-      style={{ background:"#000", minHeight:"100vh", direction:"rtl" }}
+      style={{ background:"var(--reader-bg,#000)", minHeight:"100vh", direction:"rtl" }}
       onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
     >
 
@@ -339,20 +353,26 @@ export default function SurahPage({ params }: { params: Promise<{ id: string }> 
         {/* إطار اسم السورة — في الصفحة الأولى فقط */}
         {isFirstPage && <SurahFrame name={surah.name} />}
 
-        {/* ── البسملة ──
-            قاعدة: نعرض البسملة مرة واحدة فقط.
-            - إذا كانت الآية الأولى هي البسملة في البيانات: نعرضها هنا مع رقمها (للفاتحة فقط)
-            - إذا لم تكن موجودة في البيانات: نعرض البسملة كعنصر ثابت بدون رقم
+        {/* ── البسملة (مرة واحدة فقط) ──
+            - للفاتحة: بسملة + رقم ① (لأن البسملة هي الآية الأولى)
             - سورة التوبة: لا بسملة
+            - كل السور الأخرى: نص البسملة الثابت بدون رقم
         */}
         {isFirstPage && needsBism && (
-          isBismInData
-            ? <BismillahBlock
-                text={bismText}
-                fontSize={sz}
-                showNum={surah.number === 1}
-              />
-            : <BismillahBlock fontSize={sz} />
+          <BismillahBlock
+            fontSize={sz}
+            showNum={surah.number === 1}
+          />
+        )}
+
+        {/* إذا كانت الآية الأولى تحتوي على نص إضافي بعد البسملة (مثل "الم" في البقرة) */}
+        {isFirstPage && isBismInData && afterBism && (
+          <div style={{ textAlign:"center", padding:"0 20px 16px" }}>
+            <span className="font-arabic" style={{ fontSize:sz, color:"rgba(255,255,255,0.92)" }}>
+              {afterBism}
+            </span>
+            {" "}<AyahNum n={1} sz={sz}/>
+          </div>
         )}
 
         {/* ══ النص القرآني المتدفق ══ */}

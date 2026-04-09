@@ -22,6 +22,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl" className={`${amiri.variable} h-full`}>
       <head>
+        {/* تطبيق الثيم فوراً قبل الرسم لتجنب الوميض */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('quran-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}` }} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
