@@ -1,7 +1,7 @@
 {
-  "name": "Veravox – AI Workforce OS",
-  "short_name": "Veravox",
-  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك الحقيقي",
+  "name": "طيف – AI Workforce OS | Tayf",
+  "short_name": "طيف",
+  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك | Your complete AI workforce",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f1e",
