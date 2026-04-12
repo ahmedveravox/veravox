@@ -1,0 +1,100 @@
+// Veravox AI Workforce OS – Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business      Business?
+  subscription  Subscription?
+  referralCode  String         @unique @default(cuid())
+  referredBy    String?
+  conversations Conversation[]
+  referrals     Referral[]     @relation("ReferrerUser")
+}
+
+model Business {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  type         String
+  language     String  @default("ar")
+  dialect      String  @default("sa")
+  tone         String  @default("friendly")
+  products     String?
+  paymentLinks String?
+  policies     String?
+  whatsapp     String?
+
+  agents BusinessAgent[]
+}
+
+model BusinessAgent {
+  id           String  @id @default(cuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  agentType    String
+  isActive     Boolean @default(true)
+  customPrompt String?
+
+  conversations Conversation[]
+
+  @@unique([businessId, agentType])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      String   @default("trial")
+  maxAgents Int      @default(1)
+  status    String   @default("trial")
+  trialEnds DateTime
+  renewsAt  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId   String
+  agent     BusinessAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String
+  createdAt      DateTime     @default(now())
+}
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String
+  referrer   User     @relation("ReferrerUser", fields: [referrerId], references: [id])
+  referredEmail String
+  status     String   @default("pending")
+  reward     Int      @default(30)
+  createdAt  DateTime @default(now())
+}
