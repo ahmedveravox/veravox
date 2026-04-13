@@ -88,7 +88,13 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
       });
 
       if (!res.ok || !res.body) {
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "عذراً، حدث خطأ. حاول مرة أخرى." } : m));
+        let errMsg = "عذراً، حدث خطأ. حاول مرة أخرى.";
+        try {
+          const errData = await res.clone().json();
+          if (errData.error === "trial_expired") errMsg = "⏰ انتهت فترة التجربة المجانية. يرجى الترقية لمواصلة المحادثات.";
+          else if (errData.error === "trial_limit") errMsg = "📊 وصلت لحد الـ 200 رسالة في التجربة المجانية. يرجى الترقية من صفحة الباقات.";
+        } catch { /* ignore */ }
+        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: errMsg } : m));
         setStreaming(false);
         return;
       }

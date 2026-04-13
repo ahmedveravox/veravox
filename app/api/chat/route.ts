@@ -14,6 +14,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "بيانات ناقصة" }, { status: 400 });
   }
 
+  // ── Trial limit: 7 days OR 200 messages ──────────────────────────────
+  const subscription = await db.subscription.findUnique({ where: { userId: session.user.id } });
+  if (subscription?.status === "trial") {
+    const trialExpired = new Date(subscription.trialEnds) < new Date();
+    if (trialExpired) {
+      return NextResponse.json({ error: "trial_expired", message: "انتهت فترة التجربة. يرجى الترقية للاستمرار." }, { status: 403 });
+    }
+    const msgCount = await db.message.count({
+      where: { conversation: { userId: session.user.id } },
+    });
+    if (msgCount >= 200) {
+      return NextResponse.json({ error: "trial_limit", message: "وصلت لحد الـ 200 رسالة في التجربة المجانية. يرجى الترقية." }, { status: 403 });
+    }
+  }
+
   // Get agent + business
   const agent = await db.businessAgent.findFirst({
     where: { id: agentId, business: { userId: session.user.id } },
@@ -95,7 +110,7 @@ export async function POST(req: Request) {
     .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
 
   const stream = await client.messages.stream({
-    model: "claude-opus-4-5",
+    model: "claude-sonnet-4-6",
     max_tokens: 1024,
     system: systemPrompt,
     messages: historyMessages,
