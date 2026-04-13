@@ -28,11 +28,11 @@ export async function PUT(req: Request) {
   if (!session?.user?.id) return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
 
   const body = await req.json();
-  const { name, type, dialect, tone, products, paymentLinks, policies, whatsapp } = body;
+  const { name, type, dialect, tone, products, paymentLinks, policies, whatsapp, telegramBotToken, telegramAgentType } = body;
 
   await db.business.updateMany({
     where: { userId: session.user.id },
-    data: { name, type, dialect, tone, products, paymentLinks, policies, whatsapp },
+    data: { name, type, dialect, tone, products, paymentLinks, policies, whatsapp, telegramBotToken, telegramAgentType },
   });
 
   return NextResponse.json({ success: true });

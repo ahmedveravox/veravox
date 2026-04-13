@@ -22,6 +22,7 @@ interface Business {
   dialect: string; tone: string;
   products?: string; paymentLinks?: string;
   policies?: string; whatsapp?: string;
+  telegramBotToken?: string; telegramAgentType?: string;
   agents: Array<{ id: string; agentType: string; isActive: boolean }>;
 }
 
@@ -32,7 +33,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "", dialect: "sa", tone: "friendly", products: "", paymentLinks: "", policies: "", whatsapp: "" });
+  const [form, setForm] = useState({ name: "", type: "", dialect: "sa", tone: "friendly", products: "", paymentLinks: "", policies: "", whatsapp: "", telegramBotToken: "", telegramAgentType: "support" });
+  const [telegramStatus, setTelegramStatus] = useState<{ ok: boolean; botName?: string; botUsername?: string; error?: string } | null>(null);
+  const [telegramLoading, setTelegramLoading] = useState(false);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -51,7 +54,12 @@ export default function ProfilePage() {
       paymentLinks: data.business?.paymentLinks ?? "",
       policies: data.business?.policies ?? "",
       whatsapp: data.business?.whatsapp ?? "",
+      telegramBotToken: data.business?.telegramBotToken ?? "",
+      telegramAgentType: data.business?.telegramAgentType ?? "support",
     });
+    if (data.business?.telegramBotToken) {
+      setTelegramStatus({ ok: true, botName: "متصل" });
+    }
     setLoading(false);
   }
 
@@ -61,6 +69,42 @@ export default function ProfilePage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  }
+
+  async function connectTelegram() {
+    if (!form.telegramBotToken.trim()) return;
+    setTelegramLoading(true);
+    setTelegramStatus(null);
+    try {
+      // Save agent type first
+      await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form }),
+      });
+      const res = await fetch("/api/telegram/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ botToken: form.telegramBotToken }),
+      });
+      const data = await res.json();
+      setTelegramStatus(data.ok ? { ok: true, botName: data.botName, botUsername: data.botUsername } : { ok: false, error: data.error });
+    } catch {
+      setTelegramStatus({ ok: false, error: "خطأ في الاتصال" });
+    } finally {
+      setTelegramLoading(false);
+    }
+  }
+
+  async function disconnectTelegram() {
+    setTelegramLoading(true);
+    try {
+      await fetch("/api/telegram/setup", { method: "DELETE" });
+      setForm(p => ({ ...p, telegramBotToken: "" }));
+      setTelegramStatus(null);
+    } finally {
+      setTelegramLoading(false);
+    }
   }
 
   async function toggleAgent(agentType: string) {
@@ -206,6 +250,92 @@ export default function ProfilePage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Telegram Integration */}
+      <div style={{ marginTop: 28, background: "rgba(30,41,59,0.8)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 20, padding: "24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <span style={{ fontSize: 28 }}>✈️</span>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#f8fafc" }}>ربط Telegram Bot</h2>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(248,250,252,0.45)" }}>
+              اربط بوت تيليجرام ليرد موظف AI على عملائك تلقائياً
+            </p>
+          </div>
+          {telegramStatus?.ok && (
+            <div style={{ marginRight: "auto", display: "flex", alignItems: "center", gap: 6, background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, padding: "6px 12px" }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 6px #22c55e" }} />
+              <span style={{ fontSize: 13, color: "#22c55e", fontWeight: 600 }}>متصل</span>
+            </div>
+          )}
+        </div>
+
+        {/* How to get a bot token */}
+        <div style={{ background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 12, padding: "14px 16px", marginBottom: 20 }}>
+          <div style={{ fontSize: 13, color: "#93c5fd", fontWeight: 600, marginBottom: 8 }}>📋 كيف تحصل على توكن البوت؟</div>
+          <ol style={{ margin: 0, paddingRight: 20, fontSize: 13, color: "rgba(248,250,252,0.6)", lineHeight: 2 }}>
+            <li>افتح Telegram وابحث عن <strong style={{ color: "#f8fafc" }}>@BotFather</strong></li>
+            <li>أرسل <code style={{ background: "rgba(255,255,255,0.08)", padding: "1px 6px", borderRadius: 4 }}>/newbot</code></li>
+            <li>اختر اسماً لبوتك ثم username ينتهي بـ <strong style={{ color: "#f8fafc" }}>bot</strong></li>
+            <li>انسخ التوكن الذي يرسله BotFather وألصقه أدناه</li>
+          </ol>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "flex-end", marginBottom: 16 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 13, color: "rgba(248,250,252,0.6)", marginBottom: 6 }}>توكن البوت (Bot Token)</label>
+            <input
+              value={form.telegramBotToken}
+              onChange={e => setForm(p => ({ ...p, telegramBotToken: e.target.value }))}
+              placeholder="123456789:ABCdefGHIjklMNOpqrSTUVwxyz"
+              style={{ ...inputStyle, direction: "ltr", fontFamily: "monospace", letterSpacing: "0.02em" }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 13, color: "rgba(248,250,252,0.6)", marginBottom: 6 }}>الموظف المسؤول</label>
+            <select
+              value={form.telegramAgentType}
+              onChange={e => setForm(p => ({ ...p, telegramAgentType: e.target.value }))}
+              style={{ ...inputStyle, width: "auto", minWidth: 160, cursor: "pointer" }}
+            >
+              {Object.entries(AGENT_META).map(([k, v]) => (
+                <option key={k} value={k}>{v.icon} {v.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {telegramStatus && !telegramStatus.ok && (
+          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#fca5a5" }}>
+            ⚠️ {telegramStatus.error}
+          </div>
+        )}
+        {telegramStatus?.ok && telegramStatus.botUsername && (
+          <div style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#86efac" }}>
+            ✅ تم ربط البوت: <strong>@{telegramStatus.botUsername}</strong> ({telegramStatus.botName})
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={connectTelegram} disabled={telegramLoading || !form.telegramBotToken.trim()} style={{
+            padding: "11px 24px", borderRadius: 10, border: "none",
+            background: !form.telegramBotToken.trim() ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #0088cc, #0066aa)",
+            color: !form.telegramBotToken.trim() ? "rgba(248,250,252,0.3)" : "#fff",
+            fontWeight: 700, fontSize: 14, cursor: !form.telegramBotToken.trim() ? "not-allowed" : "pointer",
+            fontFamily: "inherit",
+          }}>
+            {telegramLoading ? "⏳ جاري الربط..." : "🔗 ربط البوت"}
+          </button>
+          {telegramStatus?.ok && (
+            <button onClick={disconnectTelegram} disabled={telegramLoading} style={{
+              padding: "11px 20px", borderRadius: 10,
+              background: "transparent", border: "1px solid rgba(239,68,68,0.3)",
+              color: "#fca5a5", fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: "inherit",
+            }}>
+              فصل البوت
+            </button>
+          )}
         </div>
       </div>
     </div>
