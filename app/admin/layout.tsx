@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import AdminNavClient from "./nav-client";
 
 const ADMIN_NAV = [
   { href: "/admin", icon: "⊞", label: "لوحة التحكم" },
@@ -44,20 +45,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: "12px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
-          {ADMIN_NAV.map(item => (
-            <Link key={item.href} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "10px 12px", borderRadius: 9,
-              color: "rgba(248,250,252,0.55)", textDecoration: "none",
-              fontSize: 14, transition: "all 0.15s ease",
-            }}>
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Nav – client component for active state */}
+        <AdminNavClient items={ADMIN_NAV} />
 
         {/* Back to platform */}
         <div style={{ padding: "10px", borderTop: "1px solid rgba(239,68,68,0.08)" }}>
@@ -65,6 +54,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             display: "flex", alignItems: "center", gap: 8,
             padding: "9px 12px", borderRadius: 9,
             color: "rgba(248,250,252,0.35)", textDecoration: "none", fontSize: 13,
+            transition: "all 0.15s ease",
           }}>
             ← العودة للمنصة
           </Link>
