@@ -39,6 +39,8 @@ model Business {
   paymentLinks String?
   policies     String?
   whatsapp     String?
+  telegramBotToken   String?  // توكن بوت تيليجرام
+  telegramAgentType  String?  @default("support") // الموظف الافتراضي للتيليجرام
 
   agents BusinessAgent[]
 }
