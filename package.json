@@ -1,9 +1,9 @@
 {
-  "name": "veravox-ai-workforce",
+  "name": "tayf-ai-workforce",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname tayf.localhost",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

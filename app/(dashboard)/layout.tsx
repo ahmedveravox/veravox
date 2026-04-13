@@ -9,6 +9,7 @@ const NAV = [
   { href: "/profile", icon: "🏪", label: "نشاطي", en: "My Business" },
   { href: "/billing", icon: "💳", label: "الباقة", en: "Billing" },
   { href: "/referral", icon: "🔁", label: "سوِّق واربح", en: "Refer & Earn" },
+  { href: "/help", icon: "🎫", label: "المساعدة", en: "Help & Support" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

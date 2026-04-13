@@ -120,16 +120,19 @@ export default async function BillingPage() {
                 {isCurrent ? (
                   <div style={{ padding: "10px 0", color: "rgba(248,250,252,0.35)", fontSize: 14 }}>باقتك الحالية</div>
                 ) : (
-                  <div style={{
-                    display: "block", textAlign: "center",
-                    padding: "10px 0", borderRadius: 10,
-                    background: plan.popular ? "linear-gradient(135deg, #f59e0b, #d97706)" : "transparent",
-                    border: plan.popular ? "none" : "1px solid rgba(245,158,11,0.3)",
-                    color: plan.popular ? "#0a0f1e" : "#f59e0b",
-                    fontWeight: 700, fontSize: 14, cursor: "pointer",
-                  }}>
-                    التواصل للترقية
-                  </div>
+                  <a
+                    href={`https://wa.me/966500000000?text=${encodeURIComponent(`مرحباً، أريد الترقية إلى باقة ${plan.name} (${plan.price} ريال/شهر)`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{
+                      display: "block", textAlign: "center",
+                      padding: "10px 0", borderRadius: 10, textDecoration: "none",
+                      background: plan.popular ? "linear-gradient(135deg, #f59e0b, #d97706)" : "transparent",
+                      border: plan.popular ? "none" : "1px solid rgba(245,158,11,0.3)",
+                      color: plan.popular ? "#0a0f1e" : "#f59e0b",
+                      fontWeight: 700, fontSize: 14,
+                    }}>
+                    تواصل للترقية
+                  </a>
                 )}
               </div>
             </div>
@@ -166,12 +169,15 @@ export default async function BillingPage() {
             <br />من <span style={{ color: "#f59e0b" }}>1,999 – 4,999 ريال</span> حسب الاحتياج
           </div>
         </div>
-        <div style={{
-          padding: "12px 24px", borderRadius: 12,
-          border: "1px solid rgba(245,158,11,0.3)",
-          color: "#f59e0b", fontWeight: 700, fontSize: 15, cursor: "pointer",
-          whiteSpace: "nowrap",
-        }}>تواصل معنا</div>
+        <a
+          href="https://wa.me/966500000000?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%A8%D8%A7%D9%82%D8%A9%20Enterprise"
+          target="_blank" rel="noopener noreferrer"
+          style={{
+            padding: "12px 24px", borderRadius: 12,
+            border: "1px solid rgba(245,158,11,0.3)",
+            color: "#f59e0b", fontWeight: 700, fontSize: 15,
+            whiteSpace: "nowrap", textDecoration: "none", display: "block",
+          }}>تواصل معنا</a>
       </div>
     </div>
   );

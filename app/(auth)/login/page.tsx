@@ -46,8 +46,11 @@ export default function LoginPage() {
               background: "linear-gradient(135deg, #f59e0b, #d97706)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontWeight: 800, fontSize: 22, color: "#0a0f1e",
-            }}>V</div>
-            <span style={{ fontWeight: 800, fontSize: 22, color: "#f8fafc" }}>Veravox</span>
+            }}>ط</div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 20, color: "#f8fafc", lineHeight: 1.1 }}>طيف</div>
+              <div style={{ fontSize: 11, color: "rgba(245,158,11,0.6)", lineHeight: 1 }}>Tayf · AI Workforce</div>
+            </div>
           </Link>
           <p style={{ color: "rgba(248,250,252,0.5)", fontSize: 15, marginTop: 10 }}>
             سجّل دخولك إلى لوحة التحكم
