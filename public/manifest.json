@@ -1,7 +1,7 @@
 {
-  "name": "طيف – AI Workforce OS",
-  "short_name": "طيف",
-  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك | Your complete AI workforce",
+  "name": "موظفي – AI Workforce OS",
+  "short_name": "موظفي",
+  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
@@ -15,12 +15,7 @@
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
-  "screenshots": [],
   "shortcuts": [
-    {
-      "name": "المحادثات",
-      "url": "/dashboard",
-      "description": "افتح لوحة التحكم"
-    }
+    { "name": "لوحة التحكم", "url": "/dashboard", "description": "افتح لوحة التحكم" }
   ]
 }

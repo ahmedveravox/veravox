@@ -30,6 +30,9 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
+  const welcomeLang = searchParams.get("lang") || "ar";
+  const welcomeDialect = searchParams.get("dialect") || "sa";
+  const welcomeCity = searchParams.get("city") || "";
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -37,7 +40,7 @@ function RegisterContent() {
 
   const [form, setForm] = useState({
     name: "", email: "", password: "",
-    businessName: "", businessType: "", dialect: "sa", tone: "friendly",
+    businessName: "", businessType: "", dialect: welcomeDialect, tone: "friendly",
     referralCode: refCode,
   });
 
@@ -93,10 +96,10 @@ function RegisterContent() {
               background: "linear-gradient(135deg, #f59e0b, #d97706)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontWeight: 800, fontSize: 20, color: "#0a0f1e",
-            }}>ط</div>
+            }}>م</div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 18, color: "#f8fafc", lineHeight: 1.1 }}>طيف</div>
-              <div style={{ fontSize: 10, color: "rgba(245,158,11,0.6)", lineHeight: 1 }}>Tayf · AI Workforce</div>
+              <div style={{ fontWeight: 800, fontSize: 18, color: "#f8fafc", lineHeight: 1.1 }}>موظفي</div>
+              <div style={{ fontSize: 10, color: "rgba(245,158,11,0.6)", lineHeight: 1 }}>Muwazafi · AI Workforce</div>
             </div>
           </Link>
         </div>

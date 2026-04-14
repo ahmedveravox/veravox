@@ -4,13 +4,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "طيف – AI Workforce OS",
-    template: "%s | طيف Tayf",
+    default: "موظفي – AI Workforce OS",
+    template: "%s | موظفي",
   },
   description:
-    "طيف · Tayf – فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7. مبيعات، خدمة عملاء، تسويق، تحليل وأكثر. Your complete AI workforce.",
-  keywords: ["طيف", "Tayf", "AI workforce", "موظفين ذكاء اصطناعي", "أتمتة أعمال", "AI agents"],
-  authors: [{ name: "Tayf" }],
+    "موظفي · Muwazafi – فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7. مبيعات، خدمة عملاء، تسويق، تحليل وأكثر.",
+  keywords: ["موظفي", "Muwazafi", "AI workforce", "موظفين ذكاء اصطناعي", "أتمتة أعمال", "AI agents"],
+  authors: [{ name: "Muwazafi" }],
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
   manifest: "/manifest.json",
   openGraph: {

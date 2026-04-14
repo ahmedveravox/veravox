@@ -54,9 +54,9 @@ export default function LandingPage() {
             background: "linear-gradient(135deg, #f59e0b, #d97706)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: 800, fontSize: 20, color: "#0a0f1e",
-          }}>و</div>
-          <span style={{ fontWeight: 800, fontSize: 18, color: "#f8fafc" }}>طيف</span>
-          <span style={{ fontSize: 12, color: "rgba(245,158,11,0.7)", fontWeight: 500 }}>Tayf</span>
+          }}>م</div>
+          <span style={{ fontWeight: 800, fontSize: 18, color: "#f8fafc" }}>موظفي</span>
+          <span style={{ fontSize: 12, color: "rgba(245,158,11,0.7)", fontWeight: 500 }}>Muwazafi</span>
         </div>
 
         {/* Actions */}
@@ -70,7 +70,7 @@ export default function LandingPage() {
           <Link href="/login" style={{
             color: "rgba(248,250,252,0.65)", textDecoration: "none", fontSize: 14, fontWeight: 500,
           }}>{t("دخول", "Sign In")}</Link>
-          <Link href="/register" style={{
+          <Link href="/welcome" style={{
             padding: "8px 18px", borderRadius: 10,
             background: "linear-gradient(135deg, #f59e0b, #d97706)",
             color: "#0a0f1e", fontWeight: 700, textDecoration: "none", fontSize: 14,
@@ -104,7 +104,7 @@ export default function LandingPage() {
         </p>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/register" style={{
+          <Link href="/welcome" style={{
             padding: "14px 32px", borderRadius: 12,
             background: "linear-gradient(135deg, #f59e0b, #d97706)",
             color: "#0a0f1e", fontWeight: 700, textDecoration: "none",
@@ -251,7 +251,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/register" style={{
+              <Link href="/welcome" style={{
                 display: "block", textAlign: "center",
                 padding: "11px 0", borderRadius: 10,
                 background: plan.popular ? "linear-gradient(135deg, #f59e0b, #d97706)" : "transparent",
@@ -283,7 +283,7 @@ export default function LandingPage() {
               <>1 referral = <strong style={{ color: "#f59e0b" }}>30 SAR credit</strong><br />5 referrals = <strong style={{ color: "#f59e0b" }}>Free AI agent for a month</strong><br />10 referrals = <strong style={{ color: "#f59e0b" }}>Exclusive VIP perks</strong></>
             )}
           </p>
-          <Link href="/register" style={{
+          <Link href="/welcome" style={{
             padding: "12px 28px", borderRadius: 12,
             background: "linear-gradient(135deg, #f59e0b, #d97706)",
             color: "#0a0f1e", fontWeight: 700, textDecoration: "none", fontSize: 15, display: "inline-block",

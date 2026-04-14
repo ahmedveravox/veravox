@@ -4,6 +4,7 @@ import AdminNavClient from "./nav-client";
 
 const ADMIN_NAV = [
   { href: "/admin", icon: "⊞", label: "لوحة التحكم" },
+  { href: "/admin/messages", icon: "💬", label: "رسائل العملاء" },
   { href: "/admin/clients", icon: "👥", label: "العملاء" },
   { href: "/admin/subscriptions", icon: "💳", label: "الاشتراكات" },
   { href: "/admin/referrals", icon: "🔁", label: "الإحالات" },
@@ -32,8 +33,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               background: "linear-gradient(135deg, #ef4444, #b91c1c)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 14, fontWeight: 800, color: "white",
-            }}>ط</div>
-            <span style={{ fontWeight: 800, fontSize: 15, color: "#f8fafc" }}>طيف · Tayf</span>
+            }}>م</div>
+            <span style={{ fontWeight: 800, fontSize: 15, color: "#f8fafc" }}>موظفي</span>
           </div>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 5,
@@ -72,7 +73,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           justifyContent: "space-between",
         }}>
           <span style={{ fontSize: 13, color: "rgba(248,250,252,0.4)", fontFamily: "monospace" }}>
-            TAYF · ADMIN CONSOLE
+            موظفي · ADMIN CONSOLE
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 8px #ef4444" }} />
