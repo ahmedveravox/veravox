@@ -157,14 +157,20 @@ export default function ProfilePage() {
               <input value={form.whatsapp} onChange={e => setForm(p => ({ ...p, whatsapp: e.target.value }))} placeholder="+966XXXXXXXXX" style={{ ...inputStyle, direction: "ltr", textAlign: "right" }} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 13, color: "rgba(248,250,252,0.6)", marginBottom: 6 }}>اللهجة</label>
+              <label style={{ display: "block", fontSize: 13, color: "rgba(248,250,252,0.6)", marginBottom: 6 }}>لهجة الموظفين</label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[["sa", "سعودي"], ["ae", "إماراتي"], ["eg", "مصري"], ["kw", "كويتي"], ["msa", "فصحى"]].map(([v, l]) => (
+                {[
+                  ["sa", "🇸🇦 سعودي"], ["ae", "🇦🇪 إماراتي"], ["eg", "🇪🇬 مصري"],
+                  ["kw", "🇰🇼 كويتي"], ["qa", "🇶🇦 قطري"], ["jo", "🇯🇴 أردني"],
+                  ["sy", "🇸🇾 شامي"], ["iq", "🇮🇶 عراقي"], ["ma", "🇲🇦 مغربي"],
+                  ["msa", "📖 فصحى"], ["en", "🇬🇧 English"],
+                ].map(([v, l]) => (
                   <button key={v} onClick={() => setForm(p => ({ ...p, dialect: v }))} style={{
-                    padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "inherit",
+                    padding: "6px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontFamily: "inherit",
                     background: form.dialect === v ? "rgba(245,158,11,0.15)" : "rgba(15,23,42,0.8)",
                     border: form.dialect === v ? "1px solid rgba(245,158,11,0.4)" : "1px solid rgba(255,255,255,0.06)",
                     color: form.dialect === v ? "#fcd34d" : "rgba(248,250,252,0.6)",
+                    transition: "all 0.15s ease",
                   }}>{l}</button>
                 ))}
               </div>

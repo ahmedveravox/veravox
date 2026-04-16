@@ -118,16 +118,25 @@ export async function POST(
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
+  const isEn = business.dialect === "en";
   if (!apiKey) {
     // Mock response when no API key
-    const mocks: Record<string, string> = {
+    const mocks: Record<string, string> = isEn ? {
+      sales: `Hello ${userName}! 💼 I'm the Sales Agent at ${business.name}. How can I help you today?`,
+      support: `Hi ${userName}! 😊 I'm Customer Support at ${business.name}. How can I assist you?`,
+      technical: `Hello ${userName}! 🔧 Technical Support at ${business.name} here. What's the issue?`,
+      orders: `Hi ${userName}! 📦 I can track your order at ${business.name}. What's your order number?`,
+      reservations: `Hello ${userName}! 📅 You can book with ${business.name} right now. What time works for you?`,
+    } : {
       sales: `أهلاً ${userName}! 💼 أنا موظف المبيعات في ${business.name}. كيف أستطيع مساعدتك اليوم؟`,
       support: `مرحباً ${userName}! 😊 أنا خدمة عملاء ${business.name}. كيف أخدمك؟`,
       technical: `أهلاً ${userName}! 🔧 الدعم الفني في ${business.name} معك. ما هي مشكلتك؟`,
       orders: `مرحباً ${userName}! 📦 يمكنني متابعة طلبك في ${business.name}. ما رقم طلبك؟`,
       reservations: `أهلاً ${userName}! 📅 يمكنك الحجز في ${business.name} الآن. ما الوقت المناسب لك؟`,
     };
-    reply = mocks[agent.agentType] ?? `أهلاً ${userName}! كيف أخدمك في ${business.name}؟`;
+    reply = mocks[agent.agentType] ?? (isEn
+      ? `Hello ${userName}! How can I help you at ${business.name}?`
+      : `أهلاً ${userName}! كيف أخدمك في ${business.name}؟`);
   } else {
     try {
       const Anthropic = (await import("@anthropic-ai/sdk")).default;

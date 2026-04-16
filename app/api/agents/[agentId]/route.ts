@@ -13,7 +13,7 @@ export async function GET(
 
   const agent = await db.businessAgent.findFirst({
     where: { id: agentId, business: { userId: session.user.id } },
-    include: { business: { select: { name: true, type: true } } },
+    include: { business: { select: { name: true, type: true, dialect: true, tone: true } } },
   });
 
   if (!agent) return NextResponse.json({ error: "غير موجود" }, { status: 404 });
