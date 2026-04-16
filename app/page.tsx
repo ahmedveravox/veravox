@@ -91,8 +91,8 @@ export default function LandingPage() {
 
         <h1 style={{ fontSize: "clamp(32px, 6vw, 66px)", fontWeight: 800, lineHeight: 1.2, margin: "0 0 20px", color: "#f8fafc" }}>
           {t(
-            <>فريق موظفين{" "}<span style={{ background: "linear-gradient(135deg,#f59e0b,#fcd34d)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>طيف AI</span><br />يشتغل بدل فريقك</>,
-            <>Your{" "}<span style={{ background: "linear-gradient(135deg,#f59e0b,#fcd34d)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Tayf AI</span>{" "}Workforce<br />Works While You Sleep</>
+            <>فريق موظفين{" "}<span style={{ background: "linear-gradient(135deg,#f59e0b,#fcd34d)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>موظفي AI</span><br />يشتغل بدل فريقك</>,
+            <>Your{" "}<span style={{ background: "linear-gradient(135deg,#f59e0b,#fcd34d)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Muwazafi AI</span>{" "}Workforce<br />Works While You Sleep</>
           )}
         </h1>
 
@@ -303,9 +303,9 @@ export default function LandingPage() {
             display: "flex", alignItems: "center", justifyContent: "center",
             fontWeight: 800, fontSize: 13, color: "#0a0f1e",
           }}>و</div>
-          <strong style={{ color: "rgba(248,250,252,0.55)" }}>طيف · Tayf</strong>
+          <strong style={{ color: "rgba(248,250,252,0.55)" }}>موظفي · Muwazafi</strong>
         </div>
-        © 2026 Tayf AI Workforce OS · {t("جميع الحقوق محفوظة", "All rights reserved")}
+        © 2026 Muwazafi AI Workforce OS · {t("جميع الحقوق محفوظة", "All rights reserved")}
       </footer>
     </div>
   );

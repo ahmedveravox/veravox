@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import Link from "next/link";
 
-export const metadata = { title: "Admin Dashboard – Tayf" };
+export const metadata = { title: "Admin Dashboard – موظفي" };
 
 export default async function AdminDashboard() {
   await requireAdmin();
@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
           🎛️ لوحة تحكم المدير
         </h1>
         <p style={{ color: "rgba(248,250,252,0.4)", fontSize: 13, margin: 0 }}>
-          نظرة شاملة على منصة طيف
+          نظرة شاملة على منصة موظفي
         </p>
       </div>
 

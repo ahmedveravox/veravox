@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
   manifest: "/manifest.json",
   openGraph: {
-    title: "طيف · Tayf – AI Workforce OS",
-    description: "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك",
+    title: "موظفي · Muwazafi – AI Workforce OS",
+    description: "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7",
     type: "website",
   },
 };
@@ -35,7 +35,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="طيف" />
+        <meta name="apple-mobile-web-app-title" content="موظفي" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
       <body className="min-h-screen">

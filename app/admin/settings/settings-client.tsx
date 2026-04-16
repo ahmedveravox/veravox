@@ -114,7 +114,7 @@ export default function AdminSettingsClient({ adminId }: Props) {
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[
-            { label: "اسم المنصة", value: "طيف · Tayf AI Workforce OS" },
+            { label: "اسم المنصة", value: "موظفي · Muwazafi AI Workforce OS" },
             { label: "الإصدار", value: "1.0.0" },
             { label: "قاعدة البيانات", value: "SQLite (dev) / PostgreSQL (prod)" },
             { label: "AI", value: "Anthropic Claude (claude-sonnet-4-6)" },

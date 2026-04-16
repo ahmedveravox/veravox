@@ -51,16 +51,25 @@ export async function POST(req: Request) {
       },
     });
 
-    // Track referral
+    // Track referral with tiered rewards
     if (referralCode) {
       const referrer = await db.user.findFirst({ where: { referralCode } });
       if (referrer) {
+        const completedCount = await db.referral.count({
+          where: { referrerId: referrer.id, status: "completed" },
+        });
+        // Tiered rewards: 1st=30, 2nd=50, 3rd=50 (2-3 avg 100-150 total), 4th+=79
+        // Milestone bonus when reaching 5 or 10
+        let reward = 30;
+        if (completedCount >= 3) reward = 79;
+        else if (completedCount >= 1) reward = 50;
+
         await db.referral.create({
           data: {
             referrerId: referrer.id,
             referredEmail: email,
             status: "completed",
-            reward: 30,
+            reward,
           },
         });
       }

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import AdminClientsTable from "./clients-table";
 
-export const metadata = { title: "العملاء – Admin Tayf" };
+export const metadata = { title: "العملاء – Admin موظفي" };
 
 export default async function AdminClientsPage({
   searchParams,
