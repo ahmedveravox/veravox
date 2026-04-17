@@ -1,17 +1,18 @@
 {
+  "id": "/",
   "name": "موظفي – AI Workforce OS",
   "short_name": "موظفي",
   "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#0a0f1e",
   "theme_color": "#f59e0b",
   "orientation": "portrait-primary",
   "lang": "ar",
   "dir": "rtl",
   "categories": ["business", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
@@ -20,31 +21,22 @@
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "لوحة التحكم",
-      "url": "/dashboard",
-      "icons": [{ "src": "/api/icon/192", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/api/icon/512",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
