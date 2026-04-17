@@ -84,7 +84,7 @@ export default function AdminClientActions({ clientId, currentStatus, currentPla
     <div style={{ marginTop: 18, background: "rgba(20,30,50,0.9)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 16, padding: "20px" }}>
       <h2 style={{ margin: "0 0 18px", fontSize: 14, fontWeight: 700, color: "#f87171" }}>⚙️ إجراءات المدير</h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+      <div className="admin-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
         {/* Status toggle */}
         <div>
           <div style={{ fontSize: 12, color: "rgba(248,250,252,0.5)", marginBottom: 10 }}>حالة الحساب</div>

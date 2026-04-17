@@ -412,10 +412,67 @@ body {
 .transition-slow { transition: all 0.35s ease; }
 
 /* ─── Responsive ─── */
-@media (max-width: 768px) {
+
+/* Desktop: hide mobile button */
+.mobile-menu-btn { display: none; }
+
+/* Tablet (768px–1023px) */
+@media (max-width: 1023px) {
+  :root { --sidebar-w: 200px; }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
+  :root { --sidebar-w: 260px; }
+
   .desktop-sidebar { display: none !important; }
   .dashboard-main  { margin-right: 0 !important; }
   .mobile-menu-btn { display: flex !important; }
+
+  /* Reduce content padding */
+  .dashboard-main > div:last-child {
+    padding: 16px !important;
+  }
+
+  /* Stack 2-col grids */
+  .main-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stats: 2 per row on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Reduce stat card padding */
+  .stat-card {
+    padding: 14px 16px !important;
+  }
+  .stat-card .stat-value {
+    font-size: 26px !important;
+  }
+
+  /* Admin 3-col → 1 col */
+  .admin-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Page headers */
+  .page-content h1 {
+    font-size: 22px !important;
+  }
+
+  /* Alert banners */
+  .alert-banner {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* Topbar */
+  .dashboard-main [style*="height: 60"] {
+    padding: 0 14px !important;
+  }
 }
 
 /* ────────────────────────────────────────

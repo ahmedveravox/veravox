@@ -206,7 +206,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 10, padding: "7px 12px",
               color: "rgba(240,244,255,0.7)",
-              cursor: "pointer", fontSize: 17, display: "none",
+              cursor: "pointer", fontSize: 17,
             }}>☰</button>
 
           <div style={{ flex: 1 }} />

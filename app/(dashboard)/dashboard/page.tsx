@@ -79,7 +79,7 @@ export default async function DashboardPage() {
   const firstName = user.name.split(" ")[0];
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto" }} className="page-content">
 
       {/* ── Header ── */}
       <div style={{ marginBottom: 28 }}>
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
       )}
 
       {/* ── Stats Grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 14, marginBottom: 28 }}>
+      <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
           { label: "موظفون نشطون",      value: activeAgents.length, icon: "🤖", color: "#f59e0b", sub: `من أصل ${ALL_AGENT_TYPES.length}` },
           { label: "رسائل اليوم",       value: todayMessages,       icon: "📨", color: "#22c55e", sub: "رسائل منذ منتصف الليل" },
@@ -187,7 +187,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Main Grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, alignItems: "start" }}>
+      <div className="main-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, alignItems: "start" }}>
 
         {/* Active Agents */}
         <div style={{
