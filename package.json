@@ -23,9 +23,6 @@
     "@prisma/client": "^5.22.0",
     "next-auth": "^5.0.0-beta.25",
     "@anthropic-ai/sdk": "^0.32.1",
-    "@google/generative-ai": "^0.24.0",
-    "@capacitor/core": "^6.1.0",
-    "@capacitor/android": "^6.1.0",
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
