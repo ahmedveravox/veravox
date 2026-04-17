@@ -143,7 +143,7 @@ export default function AdminClientActions({ clientId, currentStatus, currentPla
               }}
             />
             <button onClick={extendTrial} disabled={loading} style={{
-              padding: "9px 14px", borderRadius: 9, border: "none",
+              padding: "9px 14px", borderRadius: 9,
               background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.25)",
               color: "#f59e0b", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
             }}>⏰ تمديد</button>
