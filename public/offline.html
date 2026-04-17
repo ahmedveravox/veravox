@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>موظفي – غير متصل</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #f0f4ff;
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; text-align: center; padding: 24px;
+    }
+    .card {
+      background: rgba(20,30,50,0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 48px 36px;
+      max-width: 400px;
+    }
+    .icon { font-size: 64px; margin-bottom: 20px; }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+    p { font-size: 15px; color: rgba(240,244,255,0.5); margin-bottom: 24px; line-height: 1.6; }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0a0f1e;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📡</div>
+    <h1>لا يوجد اتصال بالإنترنت</h1>
+    <p>تحقق من اتصالك بالإنترنت وأعد المحاولة. موظفي يحتاج اتصالاً لتشغيل الموظفين الذكيين.</p>
+    <button class="btn" onclick="window.location.reload()">🔄 إعادة المحاولة</button>
+  </div>
+</body>
+</html>

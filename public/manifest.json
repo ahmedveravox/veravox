@@ -1,21 +1,40 @@
 {
   "name": "موظفي – AI Workforce OS",
   "short_name": "موظفي",
-  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7",
+  "description": "فريق موظفين ذكاء اصطناعي يشتغل بدل فريقك 24/7. مبيعات، خدمة عملاء، تسويق وأكثر.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#0a0f1e",
-  "theme_color": "#0a0f1e",
-  "orientation": "portrait",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait-primary",
   "lang": "ar",
   "dir": "rtl",
   "categories": ["business", "productivity"],
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "form_factor": "wide" }
   ],
   "shortcuts": [
-    { "name": "لوحة التحكم", "url": "/dashboard", "description": "افتح لوحة التحكم" }
-  ]
+    {
+      "name": "لوحة التحكم",
+      "short_name": "الرئيسية",
+      "url": "/dashboard",
+      "description": "افتح لوحة التحكم الرئيسية",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "المحادثات",
+      "short_name": "الشات",
+      "url": "/dashboard",
+      "description": "ابدأ محادثة مع موظف AI"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

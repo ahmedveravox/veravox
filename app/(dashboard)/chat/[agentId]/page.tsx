@@ -20,12 +20,29 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   id: string;
+  imagePreview?: string;
 }
 
 interface AgentInfo {
   id: string;
   agentType: string;
   business: { name: string; dialect?: string };
+}
+
+// Web Speech API types
+interface SpeechRecognitionResult {
+  transcript: string;
+}
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: {
+    length: number;
+    [index: number]: {
+      isFinal: boolean;
+      length: number;
+      [index: number]: SpeechRecognitionResult;
+    };
+  };
 }
 
 export default function ChatPage({ params }: { params: Promise<{ agentId: string }> }) {
@@ -37,9 +54,15 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
   const [streaming, setStreaming] = useState(false);
   const [convId, setConvId]       = useState<string | null>(null);
   const [loadingAgent, setLoadingAgent] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ data: string; mime: string; preview: string } | null>(null);
+  const [recordError, setRecordError] = useState("");
+
   const messagesEndRef  = useRef<HTMLDivElement>(null);
   const textareaRef     = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef    = useRef<HTMLInputElement>(null);
   const streamContent   = useRef("");
+  const recognitionRef  = useRef<{ stop: () => void; start: () => void; abort: () => void } | null>(null);
 
   useEffect(() => { fetchAgent(); }, [agentId]);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
@@ -67,13 +90,19 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
   }
 
   async function sendMessage() {
-    if (!input.trim() || streaming) return;
+    if ((!input.trim() && !pendingImage) || streaming) return;
     const userMessage = input.trim();
+    const imagePayload = pendingImage;
     setInput("");
-    // Reset textarea height
+    setPendingImage(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
-    const userMsg: Message = { role: "user", content: userMessage, id: Date.now().toString() };
+    const userMsg: Message = {
+      role: "user",
+      content: userMessage,
+      id: Date.now().toString(),
+      imagePreview: imagePayload?.preview,
+    };
     setMessages(prev => [...prev, userMsg]);
     setStreaming(true);
 
@@ -85,7 +114,13 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, message: userMessage, conversationId: convId }),
+        body: JSON.stringify({
+          agentId,
+          message: userMessage,
+          conversationId: convId,
+          imageBase64: imagePayload?.data,
+          imageMimeType: imagePayload?.mime,
+        }),
       });
 
       if (!res.ok || !res.body) {
@@ -134,9 +169,92 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
-    // Auto-resize
     e.target.style.height = "auto";
     e.target.style.height = Math.min(e.target.scrollHeight, 130) + "px";
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert(isEn ? "Please select an image file" : "يرجى اختيار ملف صورة");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert(isEn ? "Image must be less than 5MB" : "الصورة يجب أن تكون أقل من 5 ميجابايت");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const base64 = dataUrl.split(",")[1];
+      setPendingImage({
+        data: base64,
+        mime: file.type,
+        preview: dataUrl,
+      });
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function startRecording() {
+    setRecordError("");
+    const SpeechRecognition = (window as unknown as { SpeechRecognition?: new () => unknown; webkitSpeechRecognition?: new () => unknown }).SpeechRecognition
+      ?? (window as unknown as { webkitSpeechRecognition?: new () => unknown }).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setRecordError(isEn ? "Voice recording not supported in this browser" : "التسجيل الصوتي غير مدعوم في هذا المتصفح");
+      setTimeout(() => setRecordError(""), 3000);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition() as unknown as {
+        lang: string; continuous: boolean; interimResults: boolean;
+        onresult: ((e: SpeechRecognitionEvent) => void) | null;
+        onerror: ((e: Event) => void) | null;
+        onend: (() => void) | null;
+        start: () => void; stop: () => void; abort: () => void;
+      };
+      recognition.lang = isEn ? "en-US" : "ar-SA";
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      let finalText = "";
+      recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const res = event.results[i];
+          if (res.isFinal) finalText += res[0].transcript;
+          else interim += res[0].transcript;
+        }
+        setInput(finalText + interim);
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "auto";
+          textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 130) + "px";
+        }
+      };
+      recognition.onerror = () => {
+        setRecording(false);
+        setRecordError(isEn ? "Recording error. Check microphone permissions." : "خطأ في التسجيل. تحقق من أذونات الميكروفون.");
+        setTimeout(() => setRecordError(""), 3000);
+      };
+      recognition.onend = () => {
+        setRecording(false);
+      };
+      recognition.start();
+      recognitionRef.current = recognition;
+      setRecording(true);
+    } catch {
+      setRecordError(isEn ? "Could not start recording" : "تعذر بدء التسجيل");
+      setTimeout(() => setRecordError(""), 3000);
+    }
+  }
+
+  function stopRecording() {
+    recognitionRef.current?.stop();
+    setRecording(false);
   }
 
   const meta   = agent ? (AGENT_META[agent.agentType] ?? { icon: "🤖", label: agent.agentType, labelEn: agent.agentType, color: "#f59e0b", desc: "", descEn: "" }) : null;
@@ -215,7 +333,6 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
               justifyContent: isUser ? "flex-start" : "flex-end",
               alignItems: "flex-end", gap: 8,
             }}>
-              {/* Assistant avatar */}
               {!isUser && (
                 <div style={{
                   width: 32, height: 32, borderRadius: 10, flexShrink: 0,
@@ -226,15 +343,12 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
                 }}>{meta?.icon ?? "🤖"}</div>
               )}
 
-              {/* Bubble */}
               <div style={{
                 maxWidth: "72%",
-                padding: "13px 17px",
-                // User = right side (RTL flex-start), tail at bottom-right → BR small
-                // Asst = left side (RTL flex-end), tail at bottom-left → BL small
+                padding: msg.imagePreview ? "6px 6px 10px" : "13px 17px",
                 borderRadius: isUser
-                  ? "18px 18px 4px 18px"   // user: tail bottom-right (RTL right side)
-                  : "18px 18px 18px 4px",   // asst: tail bottom-left (RTL left side)
+                  ? "18px 18px 4px 18px"
+                  : "18px 18px 18px 4px",
                 background: isUser
                   ? "linear-gradient(135deg, #f59e0b, #d97706)"
                   : "rgba(12,19,38,0.95)",
@@ -247,7 +361,20 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
                   : "0 2px 12px rgba(0,0,0,0.3)",
                 wordBreak: "break-word",
               }}>
-                {msg.content || (
+                {msg.imagePreview && (
+                  <img
+                    src={msg.imagePreview}
+                    alt="attachment"
+                    style={{
+                      maxWidth: "100%", maxHeight: 280,
+                      borderRadius: 12, display: "block",
+                      marginBottom: msg.content ? 8 : 0,
+                    }}
+                  />
+                )}
+                {msg.content ? (
+                  <div style={{ padding: msg.imagePreview ? "4px 8px 0" : 0 }}>{msg.content}</div>
+                ) : !msg.imagePreview && (
                   <div style={{ display: "flex", gap: 5, alignItems: "center", padding: "2px 0" }}>
                     {[0, 1, 2].map(i => (
                       <div key={i} className="typing-dot" style={{
@@ -259,7 +386,6 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
                 )}
               </div>
 
-              {/* User avatar */}
               {isUser && (
                 <div style={{
                   width: 32, height: 32, borderRadius: 10, flexShrink: 0,
@@ -274,7 +400,6 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
           );
         })}
 
-        {/* Streaming indicator */}
         {streaming && messages[messages.length - 1]?.role === "assistant" && !messages[messages.length - 1]?.content && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, color: "rgba(240,244,255,0.3)", fontSize: 13, paddingRight: 46 }}>
             <span className="pulse-gold" style={{ color: meta?.color ?? "#f59e0b" }}>●</span>
@@ -285,21 +410,116 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
         <div ref={messagesEndRef}/>
       </div>
 
+      {/* ── Image preview (pending) ── */}
+      {pendingImage && (
+        <div className="fade-in" style={{
+          marginBottom: 10,
+          padding: "10px 12px",
+          background: "rgba(245,158,11,0.08)",
+          border: "1px solid rgba(245,158,11,0.22)",
+          borderRadius: 14,
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <img src={pendingImage.preview} alt="preview" style={{ width: 54, height: 54, objectFit: "cover", borderRadius: 10 }} />
+          <div style={{ flex: 1, fontSize: 13, color: "#f59e0b" }}>
+            📷 {isEn ? "Image ready to send" : "الصورة جاهزة للإرسال"}
+          </div>
+          <button onClick={() => setPendingImage(null)} style={{
+            background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)",
+            color: "#f87171", padding: "6px 10px", borderRadius: 8,
+            fontSize: 12, cursor: "pointer", fontFamily: "inherit",
+          }}>✕</button>
+        </div>
+      )}
+
+      {/* Recording error toast */}
+      {recordError && (
+        <div className="fade-in" style={{
+          marginBottom: 10, padding: "8px 12px",
+          background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)",
+          borderRadius: 10, fontSize: 13, color: "#f87171",
+        }}>⚠️ {recordError}</div>
+      )}
+
+      {/* Recording indicator */}
+      {recording && (
+        <div className="fade-in" style={{
+          marginBottom: 10, padding: "10px 14px",
+          background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
+          borderRadius: 12, fontSize: 13, color: "#f87171",
+          display: "flex", alignItems: "center", gap: 10,
+        }}>
+          <span className="pulse-gold" style={{ color: "#ef4444", fontSize: 10 }}>●</span>
+          {isEn ? "Recording... speak now" : "جاري التسجيل... تحدث الآن"}
+        </div>
+      )}
+
       {/* ── Input Bar ── */}
       <div style={{
         background: "rgba(10,16,32,0.92)",
         border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 18, padding: "10px 12px",
-        display: "flex", alignItems: "flex-end", gap: 10,
+        display: "flex", alignItems: "flex-end", gap: 8,
         flexShrink: 0, backdropFilter: "blur(12px)",
         boxShadow: "0 -4px 24px rgba(0,0,0,0.2)",
       }}>
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          style={{ display: "none" }}
+        />
+
+        {/* Attach image */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={streaming}
+          title={isEn ? "Attach image" : "إرفاق صورة"}
+          style={{
+            width: 38, height: 38, borderRadius: 11, border: "none",
+            background: "rgba(255,255,255,0.04)",
+            color: "rgba(240,244,255,0.55)",
+            cursor: streaming ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 18, flexShrink: 0,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => { if (!streaming) (e.currentTarget as HTMLButtonElement).style.background = "rgba(245,158,11,0.12)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)"; }}
+        >📷</button>
+
+        {/* Voice record */}
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          disabled={streaming}
+          title={isEn ? (recording ? "Stop" : "Voice") : (recording ? "إيقاف" : "صوت")}
+          style={{
+            width: 38, height: 38, borderRadius: 11, border: "none",
+            background: recording
+              ? "linear-gradient(135deg, #ef4444, #b91c1c)"
+              : "rgba(255,255,255,0.04)",
+            color: recording ? "#fff" : "rgba(240,244,255,0.55)",
+            cursor: streaming ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 17, flexShrink: 0,
+            transition: "all 0.2s ease",
+            boxShadow: recording ? "0 4px 14px rgba(239,68,68,0.35)" : "none",
+            animation: recording ? "ping-green 1.4s ease-in-out infinite" : "none",
+          }}
+        >{recording ? "⏹" : "🎙️"}</button>
+
         <textarea
           ref={textareaRef}
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder={isEn ? "Type your message... (Enter to send)" : "اكتب رسالتك... (Enter للإرسال)"}
+          placeholder={
+            pendingImage
+              ? (isEn ? "Describe the image or ask a question..." : "اوصف الصورة أو اسأل سؤال...")
+              : (isEn ? "Type your message... (Enter to send)" : "اكتب رسالتك... (Enter للإرسال)")
+          }
           rows={1}
           style={{
             flex: 1, background: "transparent", border: "none",
@@ -311,9 +531,7 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
           }}
         />
 
-        {/* Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          {/* Shift+Enter hint */}
           {input.length > 0 && (
             <span style={{ fontSize: 11, color: "rgba(240,244,255,0.2)", whiteSpace: "nowrap" }}>
               {isEn ? "Shift+↵ newline" : "Shift+Enter للسطر التالي"}
@@ -322,25 +540,24 @@ export default function ChatPage({ params }: { params: Promise<{ agentId: string
 
           <button
             onClick={sendMessage}
-            disabled={streaming || !input.trim()}
+            disabled={streaming || (!input.trim() && !pendingImage)}
             style={{
               width: 42, height: 42, borderRadius: 13, border: "none",
-              background: streaming || !input.trim()
+              background: streaming || (!input.trim() && !pendingImage)
                 ? "rgba(245,158,11,0.15)"
                 : "linear-gradient(135deg, #f59e0b, #d97706)",
-              color: streaming || !input.trim() ? "rgba(245,158,11,0.4)" : "#0a0f1e",
-              cursor: streaming || !input.trim() ? "not-allowed" : "pointer",
+              color: streaming || (!input.trim() && !pendingImage) ? "rgba(245,158,11,0.4)" : "#0a0f1e",
+              cursor: streaming || (!input.trim() && !pendingImage) ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 19, flexShrink: 0,
               transition: "all 0.2s ease",
-              boxShadow: !streaming && input.trim() ? "0 4px 16px rgba(245,158,11,0.3)" : "none",
+              boxShadow: !streaming && (input.trim() || pendingImage) ? "0 4px 16px rgba(245,158,11,0.3)" : "none",
             }}>
             {streaming ? "⏳" : "↑"}
           </button>
         </div>
       </div>
 
-      {/* Quick suggestions for empty state */}
       {messages.length === 1 && !streaming && (
         <div className="fade-in" style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
           {(isEn

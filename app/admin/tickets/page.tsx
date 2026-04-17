@@ -20,6 +20,7 @@ export default async function TicketsPage() {
 
   const tickets = await db.supportTicket.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    include: { replies: { orderBy: { createdAt: "asc" } } },
   });
 
   // Fetch users for these tickets
@@ -131,7 +132,7 @@ export default async function TicketsPage() {
                       </div>
                     </div>
 
-                    <TicketActions ticketId={ticket.id} currentStatus={ticket.status} />
+                    <TicketActions ticketId={ticket.id} currentStatus={ticket.status} ticketSubject={ticket.subject} />
                   </div>
                 </div>
               );

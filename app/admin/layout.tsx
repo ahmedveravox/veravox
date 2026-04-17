@@ -4,11 +4,13 @@ import AdminNavClient from "./nav-client";
 
 const ADMIN_NAV = [
   { href: "/admin", icon: "⊞", label: "لوحة التحكم" },
-  { href: "/admin/messages", icon: "💬", label: "رسائل العملاء" },
   { href: "/admin/clients", icon: "👥", label: "العملاء" },
   { href: "/admin/subscriptions", icon: "💳", label: "الاشتراكات" },
-  { href: "/admin/referrals", icon: "🔁", label: "الإحالات" },
+  { href: "/admin/messages", icon: "💬", label: "الرسائل" },
   { href: "/admin/tickets", icon: "🎫", label: "الدعم" },
+  { href: "/admin/broadcast", icon: "📢", label: "الإعلانات" },
+  { href: "/admin/referrals", icon: "🔁", label: "الإحالات" },
+  { href: "/admin/logs", icon: "📋", label: "سجل الإجراءات" },
   { href: "/admin/settings", icon: "⚙️", label: "الإعدادات" },
 ];
 

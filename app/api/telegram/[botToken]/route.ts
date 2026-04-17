@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { buildSystemPrompt } from "@/lib/ai/orchestrator";
+import { streamGemini, historyToGemini } from "@/lib/ai/gemini";
 
-// Telegram API helper
 async function sendTelegramMessage(botToken: string, chatId: number, text: string) {
   await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: "Markdown",
-    }),
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
   });
 }
 
@@ -29,7 +25,6 @@ export async function POST(
 ) {
   const { botToken } = await params;
 
-  // Find business by Telegram bot token
   const business = await db.business.findFirst({
     where: { telegramBotToken: botToken },
     include: {
@@ -38,19 +33,10 @@ export async function POST(
     },
   });
 
-  if (!business) {
-    return NextResponse.json({ ok: false, error: "bot not found" }, { status: 404 });
-  }
-
-  // Check subscription
-  const sub = business.user.subscription;
-  if (business.user.status === "suspended") {
-    return NextResponse.json({ ok: false });
-  }
+  if (!business) return NextResponse.json({ ok: false, error: "bot not found" }, { status: 404 });
+  if (business.user.status === "suspended") return NextResponse.json({ ok: false });
 
   const update = await req.json();
-
-  // Handle only text messages
   const msg = update?.message ?? update?.edited_message;
   if (!msg?.text) return NextResponse.json({ ok: true });
 
@@ -58,38 +44,30 @@ export async function POST(
   const userText: string = msg.text;
   const telegramUserId = String(msg.from?.id ?? chatId);
   const userName = msg.from?.first_name ?? "عميل";
+  const isEn = business.dialect === "en";
 
-  // Trial check
-  if (sub?.status === "trial") {
-    const expired = new Date(sub.trialEnds) < new Date();
-    if (expired) {
-      await sendTelegramMessage(botToken, chatId,
-        `⏰ عذراً ${userName}، خدمة ${business.name} متوقفة مؤقتاً. يرجى التواصل مع صاحب النشاط.`);
-      return NextResponse.json({ ok: true });
-    }
-  }
-
-  // Find the right agent
-  const agentType = business.telegramAgentType ?? "support";
-  const agent = business.agents.find(a => a.agentType === agentType)
-    ?? business.agents[0];
-
-  if (!agent) {
+  const sub = business.user.subscription;
+  if (sub?.status === "trial" && new Date(sub.trialEnds) < new Date()) {
     await sendTelegramMessage(botToken, chatId,
-      `أهلاً ${userName}! سنرد عليك قريباً.`);
+      isEn
+        ? `⏰ Sorry ${userName}, ${business.name} service is temporarily paused.`
+        : `⏰ عذراً ${userName}، خدمة ${business.name} متوقفة مؤقتاً.`);
     return NextResponse.json({ ok: true });
   }
 
-  // Show typing indicator
+  const agentType = business.telegramAgentType ?? "support";
+  const agent = business.agents.find(a => a.agentType === agentType) ?? business.agents[0];
+
+  if (!agent) {
+    await sendTelegramMessage(botToken, chatId,
+      isEn ? `Hello ${userName}! We'll get back to you shortly.` : `أهلاً ${userName}! سنرد عليك قريباً.`);
+    return NextResponse.json({ ok: true });
+  }
+
   await sendTyping(botToken, chatId);
 
-  // Get or create conversation for this Telegram user
   let conv = await db.conversation.findFirst({
-    where: {
-      userId: business.userId,
-      agentId: agent.id,
-      title: `telegram:${telegramUserId}`,
-    },
+    where: { userId: business.userId, agentId: agent.id, title: `telegram:${telegramUserId}` },
     include: { messages: { orderBy: { createdAt: "asc" }, take: 20 } },
   });
 
@@ -104,9 +82,7 @@ export async function POST(
       include: { messages: { orderBy: { createdAt: "asc" } } },
     });
   } else {
-    await db.message.create({
-      data: { conversationId: conv.id, role: "user", content: userText },
-    });
+    await db.message.create({ data: { conversationId: conv.id, role: "user", content: userText } });
     conv = await db.conversation.findFirst({
       where: { id: conv.id },
       include: { messages: { orderBy: { createdAt: "asc" }, take: 20 } },
@@ -114,67 +90,65 @@ export async function POST(
   }
 
   const systemPrompt = buildSystemPrompt(agent.agentType, business as Parameters<typeof buildSystemPrompt>[1]);
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
   let reply = "";
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  const isEn = business.dialect === "en";
-  if (!apiKey) {
-    // Mock response when no API key
-    const mocks: Record<string, string> = isEn ? {
-      sales: `Hello ${userName}! 💼 I'm the Sales Agent at ${business.name}. How can I help you today?`,
-      support: `Hi ${userName}! 😊 I'm Customer Support at ${business.name}. How can I assist you?`,
-      technical: `Hello ${userName}! 🔧 Technical Support at ${business.name} here. What's the issue?`,
-      orders: `Hi ${userName}! 📦 I can track your order at ${business.name}. What's your order number?`,
-      reservations: `Hello ${userName}! 📅 You can book with ${business.name} right now. What time works for you?`,
-    } : {
-      sales: `أهلاً ${userName}! 💼 أنا موظف المبيعات في ${business.name}. كيف أستطيع مساعدتك اليوم؟`,
-      support: `مرحباً ${userName}! 😊 أنا خدمة عملاء ${business.name}. كيف أخدمك؟`,
-      technical: `أهلاً ${userName}! 🔧 الدعم الفني في ${business.name} معك. ما هي مشكلتك؟`,
-      orders: `مرحباً ${userName}! 📦 يمكنني متابعة طلبك في ${business.name}. ما رقم طلبك؟`,
-      reservations: `أهلاً ${userName}! 📅 يمكنك الحجز في ${business.name} الآن. ما الوقت المناسب لك؟`,
-    };
-    reply = mocks[agent.agentType] ?? (isEn
-      ? `Hello ${userName}! How can I help you at ${business.name}?`
-      : `أهلاً ${userName}! كيف أخدمك في ${business.name}؟`);
-  } else {
+  if (geminiKey) {
+    try {
+      const history = (conv?.messages ?? [])
+        .filter(m => m.role === "user" || m.role === "assistant")
+        .slice(-16, -1);
+      await streamGemini({
+        apiKey: geminiKey,
+        systemPrompt,
+        history: historyToGemini(history),
+        userText,
+        onChunk: (t) => { reply += t; },
+        onDone: () => {},
+      });
+    } catch {
+      reply = isEn ? `Hello ${userName}! From ${business.name}.` : `أهلاً ${userName}! من ${business.name}.`;
+    }
+  } else if (anthropicKey) {
     try {
       const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      const client = new Anthropic({ apiKey });
-
+      const client = new Anthropic({ apiKey: anthropicKey });
       const history = (conv?.messages ?? [])
         .filter(m => m.role === "user" || m.role === "assistant")
         .slice(-16)
         .map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
-
       const response = await client.messages.create({
-        model: "claude-sonnet-4-6",
-        max_tokens: 512,
-        system: systemPrompt,
-        messages: history,
+        model: "claude-sonnet-4-6", max_tokens: 512, system: systemPrompt, messages: history,
       });
-
       reply = response.content[0].type === "text" ? response.content[0].text : "";
     } catch {
-      reply = `أهلاً ${userName}! نحن من ${business.name}. سنرد عليك قريباً.`;
+      reply = isEn ? `Hello ${userName}!` : `أهلاً ${userName}!`;
     }
+  } else {
+    const mocks: Record<string, string> = isEn ? {
+      sales: `Hello ${userName}! 💼 Sales Agent at ${business.name}. How can I help?`,
+      support: `Hi ${userName}! 😊 Customer Support at ${business.name}.`,
+      technical: `Hello ${userName}! 🔧 Tech Support at ${business.name}. What's the issue?`,
+      orders: `Hi ${userName}! 📦 Order tracking at ${business.name}.`,
+      reservations: `Hello ${userName}! 📅 Book with ${business.name} now.`,
+    } : {
+      sales: `أهلاً ${userName}! 💼 موظف مبيعات ${business.name}.`,
+      support: `مرحباً ${userName}! 😊 خدمة عملاء ${business.name}.`,
+      technical: `أهلاً ${userName}! 🔧 الدعم الفني في ${business.name}.`,
+      orders: `مرحباً ${userName}! 📦 متابعة الطلبات في ${business.name}.`,
+      reservations: `أهلاً ${userName}! 📅 الحجز في ${business.name}.`,
+    };
+    reply = mocks[agent.agentType] ?? (isEn ? `Hello ${userName}!` : `أهلاً ${userName}!`);
   }
 
-  // Save assistant response
-  await db.message.create({
-    data: { conversationId: conv!.id, role: "assistant", content: reply },
-  });
-  await db.conversation.update({
-    where: { id: conv!.id }, data: { updatedAt: new Date() },
-  });
-
-  // Send reply to Telegram
+  await db.message.create({ data: { conversationId: conv!.id, role: "assistant", content: reply } });
+  await db.conversation.update({ where: { id: conv!.id }, data: { updatedAt: new Date() } });
   await sendTelegramMessage(botToken, chatId, reply);
 
   return NextResponse.json({ ok: true });
 }
 
-// GET: verify webhook setup
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ botToken: string }> }

@@ -1,13 +1,14 @@
-const CACHE_NAME = "tayf-v1";
+const CACHE_NAME = "muwazafi-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
   "/icon.svg",
+  "/offline.html",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS).catch(() => {}))
   );
   self.skipWaiting();
 });
@@ -25,19 +26,40 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Don't cache API calls or Next.js internals
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_next/")) {
-    return;
-  }
+  // Skip API calls, Next.js internals, and non-GET requests
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/_next/") ||
+    request.method !== "GET"
+  ) return;
 
-  // Network-first for navigation, cache-first for static assets
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match("/"))
+      fetch(request)
+        .catch(() => caches.match("/offline.html") ?? caches.match("/"))
     );
   } else {
     event.respondWith(
-      caches.match(request).then((cached) => cached ?? fetch(request))
+      caches.match(request).then((cached) => cached ?? fetch(request).then((response) => {
+        if (response.ok && url.origin === self.location.origin) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(request, clone));
+        }
+        return response;
+      }))
     );
   }
+});
+
+self.addEventListener("push", (event) => {
+  const data = event.data?.json() ?? { title: "موظفي", body: "لديك إشعار جديد" };
+  event.waitUntil(
+    self.registration.showNotification(data.title ?? "موظفي", {
+      body: data.body ?? "",
+      icon: "/icon.svg",
+      badge: "/icon.svg",
+      dir: "rtl",
+      lang: "ar",
+    })
+  );
 });

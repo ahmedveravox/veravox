@@ -202,7 +202,12 @@ export default async function AdminClientDetailPage({
       </div>
 
       {/* Admin Actions */}
-      <AdminClientActions clientId={client.id} currentStatus={client.status} currentPlan={client.subscription?.plan ?? "trial"} />
+      <AdminClientActions
+        clientId={client.id}
+        currentStatus={client.status}
+        currentPlan={client.subscription?.plan ?? "trial"}
+        trialEnds={client.subscription?.trialEnds?.toISOString()}
+      />
     </div>
   );
 }
